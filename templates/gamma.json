@@ -1,0 +1,33 @@
+{
+    "name": "",
+    "version": "0.0.0",
+    "monitors": [
+        {
+            "_id": 0,
+            "type": ["check", "metric"],
+            "name": "",
+            "interval": 0.0,
+            "action": {
+                "command": "",
+                "resource": ""
+            },
+            "handler": {
+                "_id": 0,
+                "name": ""
+            }
+        }     
+    ],
+    "handlers": [
+        {
+            "_id": 0,
+            "name": "", 
+            "transport": {
+                "type": ["http", "smtp", "amqp", "tcp", "udp"],
+                "host": "0.0.0.0 or URL",
+                "port": 0
+            }
+        }
+    ]
+}
+
+
