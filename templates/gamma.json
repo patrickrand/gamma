@@ -3,29 +3,35 @@
     "version": "0.0.0",
     "monitors": [
         {
-            "_id": 0,
+            "id": 0,
             "type": ["check", "metric"],
-            "name": "",
-            "interval": 0.0,
             "action": {
                 "command": "",
-                "resource": ""
+                "resource": "",
+                "interval": 0.0
             },
-            "handler": {
-                "_id": 0,
-                "name": ""
-            }
+            "handlers": [
+                {
+                    "id": 0,
+                    "type": ["http", "smtp", "amqp", "tcp", "udp"],
+                    "destination": {                
+                        "host": "0.0.0.0 or URL",
+                        "port": 0
+                    },
+                    "parameters": {}
+                }
+            ]
         }     
     ],
     "handlers": [
         {
-            "_id": 0,
-            "name": "", 
-            "transport": {
-                "type": ["http", "smtp", "amqp", "tcp", "udp"],
+            "id": 0,
+            "type": ["http", "smtp", "amqp", "tcp", "udp"],
+            "destination": {                
                 "host": "0.0.0.0 or URL",
                 "port": 0
-            }
+            },
+            "parameters": {}
         }
     ]
 }

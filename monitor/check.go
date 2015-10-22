@@ -1,30 +1,40 @@
 package monitor
 
 import (
+	"github.com/patrickrand/gamma/handler"
 	"time"
+)
+
+var (
+	CHECK = "check"
 )
 
 type Check struct {
 	ID       string `json:"id"`
-	Name     string `json:"name"`
-	Version  string `json:"version"`
-	Interval int    `json:"interval"`
 	Action   `json:"action"`
-	Handler  `json:"handler"`
+	Handlers []handler.Handler `json:"handlers"`
 }
 
-func NewCheck() *Check {
-	return &Check{}
+func NewCheck(id string, action Action, handlers []handler.Handler) *Check {
+	return &Check{
+		ID:       id,
+		Action:   action,
+		Handlers: handlers,
+	}
 }
 
 func (c *Check) Id() string {
 	return c.ID
 }
 
+func (c *Check) Type() string {
+	return CHECK
+}
+
 func (c *Check) Exec() (Result, error) {
 	return nil, nil
 }
 
-func (c *Check) RuntimeInterval() time.Duration {
+func (c *Check) Interval() time.Duration {
 	return 0
 }

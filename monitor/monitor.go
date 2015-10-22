@@ -1,8 +1,12 @@
 package monitor
 
+import (
+	"time"
+)
+
 type Monitor interface {
 	Id() string
 	Type() string
 	Exec() (Result, error)
-	RuntimeInterval() time.Duration
+	Interval() time.Duration
 }
