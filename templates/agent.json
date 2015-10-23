@@ -16,7 +16,8 @@
                     "type": ["http", "smtp", "amqp", "tcp", "udp"],
                     "destination": {                
                         "host": "0.0.0.0 or URL",
-                        "port": 0
+                        "port": 0,
+                        "subpath": ""
                     },
                     "parameters": {}
                 }
@@ -29,7 +30,8 @@
             "type": ["http", "smtp", "amqp", "tcp", "udp"],
             "destination": {                
                 "host": "0.0.0.0 or URL",
-                "port": 0
+                "port": 0,
+                "subpath": ""
             },
             "parameters": {}
         }

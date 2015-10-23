@@ -1,19 +1,23 @@
 package handler
 
+// check := NewCheck()
+// result := check.Exec()
+
+// handler := handlerFactory[check.ID()]
+// handler.Handle(result)
+
 type HttpHandler struct {
-	Id           string `json:"id"`
-	*Destination `json:"destination"`
-	Parameters   `json:"parameters"`
+	Id          string `json:"id"`
+	Destination `json:"destination"`
+	Parameters  `json:"parameters"`
 }
 
-func NewHttpHandler(id string, dest *Destination, params map[string]interface{}) *HttpHandler {
+func NewHttpHandler(id string, dest Destination, params map[string]interface{}) *HttpHandler {
 	return &HttpHandler{
-		Id:          id,
-		Destination: dest,
-		Parameters:  params,
+		Id:         id,
+		Parameters: params,
 	}
 }
-
-func (h HttpHandler) Handle(channel <-chan bool) {
+func (h HttpHandler) Handle(res Result) {
 
 }

@@ -16,10 +16,10 @@ type Output struct {
 	Message string
 }
 
-type Result interface {
-	MonitorId() int
-	Status() int
-	StartTime() time.Time
-	EndTime() time.Time
-	Data() (*Output, error)
+type Result struct {
+	MonitorId string
+	Status    int
+	StartTime time.Time
+	EndTime   time.Time
+	*Output
 }
