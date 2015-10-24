@@ -1,23 +1,39 @@
 package monitor
 
 import (
+	//"bufio"
+	"bytes"
+	"encoding/json"
+	"os/exec"
 	"time"
 )
 
-type Action struct {
-	Command  string        `json:"command"`
-	Resource string        `json:"resource"`
-	Interval time.Duration `json:"interval"`
+type Output struct {
+	Status  *int   `json:"status"`
+	Message string `json:"message,omitempty"`
 }
 
-func NewAction(command, resource string, interval time.Duration) *Action {
+type Action struct {
+	CommandPath string        `json:"command_path"`
+	CommandArgs []string      `json:"command_args"`
+	Interval    time.Duration `json:"interval"`
+}
+
+func NewAction(path string, args []string, interval time.Duration) *Action {
 	return &Action{
-		Command:  command,
-		Resource: resource,
-		Interval: interval,
+		CommandPath: path,
+		CommandArgs: args,
+		Interval:    interval,
 	}
 }
 
-func (a *Action) Run() (Result, error) {
-	return nil, nil
+func (a *Action) Run() (output Output, err error) {
+	cmd := exec.Command(a.CommandPath, a.CommandArgs...)
+	b, err := cmd.Output()
+	if err != nil {
+		return
+	}
+
+	err = json.NewDecoder(bytes.NewReader(b)).Decode(&output)
+	return
 }

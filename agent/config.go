@@ -2,41 +2,44 @@ package agent
 
 import (
 	"encoding/json"
-	"github.com/patrickrand/gamma/handler"
-	"github.com/patrickrand/gamma/monitor"
+	"errors"
 	"os"
 	"path/filepath"
+	"regexp"
+	"strconv"
+	"strings"
 )
 
 type Config struct {
-	Name     string            `json:"name"`
-	Version  string            `json:"version"`
-	Monitors []monitor.Monitor `json:"monitors"`
-	Handlers []handler.Handler `json:"handlers"`
+	AgentName    string                 `json:"agent_name"`
+	AgentVersion string                 `json:"agent_version"`
+	Monitors     map[string]interface{} `json:"monitors"`
+	Handlers     map[string]interface{} `json:"handlers"`
 }
 
-func (cfg Config) LoadFile(file string) error {
+func NewConfigFromFile(file string) (cfg Config, err error) {
 	absPath, err := filepath.Abs(file)
 	if err != nil {
-		return err
+		return
 	}
 
 	configFile, err := os.Open(absPath)
 	if err != nil {
-		return err
+		return
 	}
 
-	return json.NewDecoder(configFile).Decode(&cfg)
+	err = json.NewDecoder(configFile).Decode(&cfg)
+	return
 }
 
 func (cfg Config) Validate() error {
 	var errs Errors
 
-	if !regexp.MustCompile("^[a-z][a-z-]*[a-z]$").MatchString(cfg.AgentName) {
+	if !regexp.MustCompile("^[a-z][a-z_-]*[a-z]$").MatchString(cfg.AgentName) {
 		errs = append(errs, errors.New("engine.Config.Validate: `name` must match `^[a-z][a-z-]*[a-z]$`"))
 	}
 
-	vers := strings.Split(cfg.Version, ".")
+	vers := strings.Split(cfg.AgentVersion, ".")
 	if len(vers) != 3 {
 		errs = append(errs, errors.New("engine.Config.ValidateVersion: invalid octet count"))
 	}
@@ -49,5 +52,8 @@ func (cfg Config) Validate() error {
 		}
 	}
 
+	if len(errs) == 0 {
+		return nil
+	}
 	return errs
 }

@@ -6,6 +6,8 @@ package handler
 // handler := handlerFactory[check.ID()]
 // handler.Handle(result)
 
+var HTTP = "http"
+
 type HttpHandler struct {
 	Id          string `json:"id"`
 	Destination `json:"destination"`
@@ -18,6 +20,7 @@ func NewHttpHandler(id string, dest Destination, params map[string]interface{}) 
 		Parameters: params,
 	}
 }
-func (h HttpHandler) Handle(res Result) {
+
+func (h HttpHandler) Handle(data interface{}, ch chan<- bool) {
 
 }

@@ -1,41 +1,32 @@
 {
-    "name": "",
-    "version": "0.0.0",
-    "monitors": [
-        {
-            "id": 0,
-            "type": ["check", "metric"],
+    "agent_name": "my_agent",
+    "agent_version": "0.1.0",
+    "monitors": {
+        "m_check": {
+            "type": "check",
             "action": {
-                "command": "",
-                "resource": "",
-                "interval": 0.0
+                "command": {
+                    "path": "/usr/bin/ls",
+                    "args": {
+                        "-l": {}
+                    }
+                },
+                "interval": 60
             },
-            "handlers": [
-                {
-                    "id": 0,
-                    "type": ["http", "smtp", "amqp", "tcp", "udp"],
-                    "destination": {                
-                        "host": "0.0.0.0 or URL",
-                        "port": 0,
-                        "subpath": ""
-                    },
-                    "parameters": {}
-                }
-            ]
+            "handler_ids": ["h_http"]
         }     
-    ],
-    "handlers": [
-        {
-            "id": 0,
-            "type": ["http", "smtp", "amqp", "tcp", "udp"],
+    },
+    "handlers": { 
+        "h_http" : {
+            "type": "http",
             "destination": {                
-                "host": "0.0.0.0 or URL",
-                "port": 0,
+                "host": "localhost",
+                "port": 80,
                 "subpath": ""
             },
             "parameters": {}
         }
-    ]
+    }
 }
 
 
