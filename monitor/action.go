@@ -3,7 +3,7 @@ package monitor
 import (
 	"bytes"
 	"encoding/json"
-	//	"log"
+	log "github.com/patrickrand/gamma/log"
 	"os/exec"
 	"time"
 )
@@ -19,21 +19,19 @@ type Action struct {
 	Interval    time.Duration `json:"interval"`
 }
 
-func NewAction(path string, args []string, interval time.Duration) *Action {
-	return &Action{
-		CommandPath: path,
-		CommandArgs: args,
-		Interval:    interval,
-	}
-}
-
 func (a *Action) Run() (output Output, err error) {
-	cmd := exec.Command(a.CommandPath, a.CommandArgs...)
-	b, err := cmd.Output()
+	log.DBUG("action", "(*Action).Run => (%s)", log.PrintJson(a))
+
+	b, err := exec.Command(a.CommandPath, a.CommandArgs...).Output()
 	if err != nil {
+		log.EROR("action", "Error executing command (%s) => %s", err.Error(), log.PrintJson(a))
 		return
 	}
 
 	err = json.NewDecoder(bytes.NewReader(b)).Decode(&output)
+	if err != nil {
+		log.EROR("action", "Unable to decode command output (%s) => %s", err.Error(), log.PrintJson(a))
+	}
+
 	return
 }

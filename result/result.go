@@ -1,6 +1,7 @@
 package result
 
 import (
+	log "github.com/patrickrand/gamma/log"
 	"time"
 )
 
@@ -21,5 +22,6 @@ type Result struct {
 }
 
 func New(startTime time.Time) *Result {
+	log.DBUG("result", "result.New => %s", startTime.String())
 	return &Result{StartTime: startTime}
 }

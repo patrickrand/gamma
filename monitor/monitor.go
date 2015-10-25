@@ -1,6 +1,7 @@
 package monitor
 
 import (
+	log "github.com/patrickrand/gamma/log"
 	"github.com/patrickrand/gamma/result"
 	"time"
 )
@@ -15,6 +16,7 @@ type Monitor interface {
 }
 
 func New(monitorType string) Monitor {
+	log.DBUG("monitor", "monitor.New => %s", monitorType)
 	switch monitorType {
 	case CHECK:
 		return &Check{}

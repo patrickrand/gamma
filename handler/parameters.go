@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"errors"
+	log "github.com/patrickrand/gamma/log"
 )
 
 var (
@@ -12,6 +13,8 @@ var (
 type Parameters map[string]interface{}
 
 func (p Parameters) Get(key string, result interface{}) error {
+	log.DBUG("parameters", "(Parameters).Get => (%+v).%s, %+v", p, key, result)
+
 	if value, ok := p[key]; !ok {
 		return ErrKeyNotFound
 	} else {
@@ -25,10 +28,14 @@ func (p Parameters) Get(key string, result interface{}) error {
 }
 
 func (p Parameters) Set(key string, value interface{}) {
+	log.DBUG("parameters", "(Parameters).Set => (%+v).%s, %+v", p, key, value)
+
 	p[key] = value
 }
 
 func (p Parameters) Delete(key string) interface{} {
+	log.DBUG("parameters", "(Parameters).Delete => (%+v).%s", p, key)
+
 	if value, ok := p[key]; ok {
 		delete(p, key)
 		return value

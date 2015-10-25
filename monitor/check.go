@@ -2,6 +2,7 @@ package monitor
 
 import (
 	"fmt"
+	log "github.com/patrickrand/gamma/log"
 	"github.com/patrickrand/gamma/result"
 	"time"
 )
@@ -18,8 +19,10 @@ func (c *Check) Type() string {
 }
 
 func (c *Check) Exec() *result.Result {
-	fmt.Println("%+v", c.Action)
+	log.DBUG("check", "(*Check).Exec => (%s)", log.PrintJson(c))
+
 	res := result.New(time.Now())
+
 	output, err := c.Action.Run()
 	if err != nil {
 		res.Error = err

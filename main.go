@@ -1,37 +1,53 @@
 package main
 
 import (
+	"encoding/json"
 	"github.com/patrickrand/gamma/agent"
+	log "github.com/patrickrand/gamma/log"
 	"github.com/patrickrand/gamma/result"
-	"log"
 )
 
 const CONFIG_FILE = "/home/patrrand/go-ws/src/github.com/patrickrand/gamma/templates/agent.json"
 
 func main() {
-	log.Println("Starting Gamma...")
+	log.INFO("main", "Starting Gamma...")
 
 	cfg, err := agent.NewConfigFromFile(CONFIG_FILE)
 	if err != nil {
-		log.Printf("Error loading config file => %s", err.Error())
-		panic("Exiting Gamma...")
+		log.EROR("main", "Exiting Gamma... => %s", err.Error())
+		panic("")
 	}
-	log.Printf("Config loaded from file: %s", CONFIG_FILE)
 
 	agent, err := agent.New(cfg)
 	if err != nil {
-		log.Printf("Error creating Agent from Config => %s", err.Error())
-		panic("Exiting Gamma...")
+		log.EROR("main", "Exiting Gamma... => %s", err.Error())
+		panic("")
 	}
-	log.Printf("Agent initialized: %+v", *agent)
 
-	for k, m := range agent.Monitors {
-		res := m.Exec()
-		res.MonitorId = string(k)
-		if res.Error != nil {
-			res.Status = result.StatusErr
+	handle(exec(agent))
+}
+
+func exec(agent *agent.Agent) <-chan result.Result {
+	out := make(chan result.Result)
+	go func() {
+		for k, m := range agent.Monitors {
+			js, _ := json.Marshal(m)
+			log.INFO("main", "exec => %s", string(js))
+			res := m.Exec()
+			res.MonitorId = string(k)
+			if res.Error != nil {
+				res.Status = result.StatusErr
+			}
+
+			out <- *res
 		}
-		log.Printf("%+v", *res)
+		close(out)
+	}()
+	return out
+}
 
+func handle(in <-chan result.Result) {
+	for r := range in {
+		log.INFO("main", "handle => %+v", r)
 	}
 }

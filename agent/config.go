@@ -2,12 +2,9 @@ package agent
 
 import (
 	"encoding/json"
-	"errors"
+	log "github.com/patrickrand/gamma/log"
 	"os"
 	"path/filepath"
-	"regexp"
-	"strconv"
-	"strings"
 )
 
 type Config struct {
@@ -18,42 +15,26 @@ type Config struct {
 }
 
 func NewConfigFromFile(file string) (cfg Config, err error) {
+	log.DBUG("config", "NewConfigFromFile => %s", file)
+
 	absPath, err := filepath.Abs(file)
 	if err != nil {
+		log.EROR("config", "Failed to extract absolute filepath (%s) => %s", err.Error(), file)
 		return
 	}
 
 	configFile, err := os.Open(absPath)
 	if err != nil {
+		log.EROR("config", "Unable to open file (%s) => %s", err.Error(), absPath)
 		return
 	}
 
 	err = json.NewDecoder(configFile).Decode(&cfg)
+	if err != nil {
+		log.EROR("config", "Unable to decode config file (%s)", err.Error())
+	} else {
+		log.INFO("config", "Loaded config from file => %s", absPath)
+	}
+
 	return
-}
-
-func (cfg Config) Validate() error {
-	var errs Errors
-
-	if !regexp.MustCompile("^[a-z][a-z_-]*[a-z]$").MatchString(cfg.AgentName) {
-		errs = append(errs, errors.New("engine.Config.Validate: `name` must match `^[a-z][a-z-]*[a-z]$`"))
-	}
-
-	vers := strings.Split(cfg.AgentVersion, ".")
-	if len(vers) != 3 {
-		errs = append(errs, errors.New("engine.Config.ValidateVersion: invalid octet count"))
-	}
-
-	for i := range vers {
-		_, err := strconv.ParseUint(vers[i], 10, 8)
-		if err != nil {
-			errs = append(errs, errors.New("engine.Config.ValidateVersion: semantic version can only contain octets"))
-			break
-		}
-	}
-
-	if len(errs) == 0 {
-		return nil
-	}
-	return errs
 }

@@ -7,6 +7,32 @@ import (
 	"strings"
 )
 
+//func (cfg Config) Validate() error {
+//	var errs Errors
+//
+//	if !regexp.MustCompile("^[a-z][a-z_-]*[a-z]$").MatchString(cfg.AgentName) {
+//		errs = append(errs, errors.New("engine.Config.Validate: `name` must match `^[a-z][a-z-]*[a-z]$`"))
+//	}
+//
+//	vers := strings.Split(cfg.AgentVersion, ".")
+//	if len(vers) != 3 {
+//		errs = append(errs, errors.New("engine.Config.ValidateVersion: invalid octet count"))
+//	}
+//
+//	for i := range vers {
+//		_, err := strconv.ParseUint(vers[i], 10, 8)
+//		if err != nil {
+//			errs = append(errs, errors.New("engine.Config.ValidateVersion: semantic version can only contain octets"))
+//			break
+//		}
+//	}
+//
+//	if len(errs) == 0 {
+//		return nil
+//	}
+//	return errs
+//}
+
 type Version struct {
 	Major uint8 `json:"major"`
 	Minor uint8 `json:"minor"`

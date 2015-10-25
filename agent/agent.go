@@ -19,44 +19,52 @@ func New(cfg Config) (*Agent, error) {
 }
 
 func loadAgentFromConfig(cfg Config) (*Agent, error) {
-	err := cfg.Validate()
-	if err != nil {
-		return nil, err
-	}
+	log.DBUG("agent", "loadAgentFromConfig => %s", log.PrintJson(cfg))
 
 	agent := &Agent{
 		Name:    cfg.AgentName,
 		Version: cfg.AgentVersion,
 	}
 
+	log.INFO("agent", "Creating new agent => %s %s", agent.Name, agent.Version)
+
 	agent.Monitors = make(map[monitor.ID]monitor.Monitor, 0)
 	for i, m := range cfg.Monitors {
-		//m := m.(map[string]interface{})
 		monit := monitor.New(m.(map[string]interface{})["type"].(string))
 
-		log.Infof("test", "hello, %s!", "world")
 		data, err := json.Marshal(m)
 		if err != nil {
+			log.EROR("agent", "Marshalling error (%s) for monitor", err.Error())
 			return nil, err
 		}
 		err = json.Unmarshal(data, monit)
 		if err != nil {
+			log.EROR("agent", "Unmarshalling error (%s) for monitor", err.Error())
 			return nil, err
 		}
 
 		agent.Monitors[monitor.ID(i)] = monit
+		log.INFO("agent", "Added new agent monitor (%v) => %s", monitor.ID(i), log.PrintJson(monit))
 	}
 
 	cfgHandlers := make(map[string]handler.Handler, 0)
 	for i, h := range cfg.Handlers {
-		h := h.(map[string]interface{})
-		handlr := handler.New(h["type"].(string))
+		handlr := handler.New(h.(map[string]interface{})["type"].(string))
+
 		data, err := json.Marshal(h)
-		err = json.Unmarshal(data, handlr)
 		if err != nil {
+			log.EROR("agent", "Marshalling error (%s) for handler", err.Error())
 			return nil, err
 		}
+
+		err = json.Unmarshal(data, handlr)
+		if err != nil {
+			log.EROR("agent", "Unmarshalling error (%s) for handler", err.Error())
+			return nil, err
+		}
+
 		cfgHandlers[i] = handlr
+		log.INFO("agent", "Added new agent handler (%s) => %s", i, log.PrintJson(handlr))
 	}
 
 	agent.Handlers = make(map[monitor.ID][]handler.Handler)
