@@ -18,6 +18,7 @@ func (c *Check) Type() string {
 }
 
 func (c *Check) Exec() *result.Result {
+	fmt.Println("%+v", c.Action)
 	res := result.New(time.Now())
 	output, err := c.Action.Run()
 	if err != nil {

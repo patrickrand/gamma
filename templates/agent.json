@@ -5,15 +5,11 @@
         "m_check": {
             "type": "check",
             "action": {
-                "command": {
-                    "path": "/usr/bin/ls",
-                    "args": {
-                        "-l": {}
-                    }
-                },
+                "command_path": "/usr/bin/python",
+                "command_args": ["/home/patrrand/py-check.py"],
                 "interval": 60
             },
-            "handler_ids": ["h_http"]
+           "handler_ids": ["h_http"]
         }     
     },
     "handlers": { 

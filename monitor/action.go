@@ -1,9 +1,9 @@
 package monitor
 
 import (
-	//"bufio"
 	"bytes"
 	"encoding/json"
+	//	"log"
 	"os/exec"
 	"time"
 )

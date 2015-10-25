@@ -3,6 +3,7 @@ package agent
 import (
 	"encoding/json"
 	"github.com/patrickrand/gamma/handler"
+	log "github.com/patrickrand/gamma/log"
 	"github.com/patrickrand/gamma/monitor"
 )
 
@@ -30,13 +31,19 @@ func loadAgentFromConfig(cfg Config) (*Agent, error) {
 
 	agent.Monitors = make(map[monitor.ID]monitor.Monitor, 0)
 	for i, m := range cfg.Monitors {
-		m := m.(map[string]interface{})
-		monit := monitor.New(m["type"].(string))
+		//m := m.(map[string]interface{})
+		monit := monitor.New(m.(map[string]interface{})["type"].(string))
+
+		log.Infof("test", "hello, %s!", "world")
 		data, err := json.Marshal(m)
+		if err != nil {
+			return nil, err
+		}
 		err = json.Unmarshal(data, monit)
 		if err != nil {
 			return nil, err
 		}
+
 		agent.Monitors[monitor.ID(i)] = monit
 	}
 
