@@ -18,7 +18,6 @@ type logger struct {
 const (
 	DBUG_LVL = iota - 1
 	INFO_LVL
-	WARN_LVL
 	EROR_LVL
 )
 
@@ -37,10 +36,6 @@ func DBUG(tag, format string, val ...interface{}) {
 
 func INFO(tag, format string, val ...interface{}) {
 	write(INFO_LVL, tag, format, val...)
-}
-
-func WARN(tag, format string, val ...interface{}) {
-	write(WARN_LVL, tag, format, val...)
 }
 
 func EROR(tag, format string, val ...interface{}) {
@@ -80,8 +75,6 @@ func PrintLevel(lvl int) string {
 		return "DBUG"
 	case INFO_LVL:
 		return "INFO"
-	case WARN_LVL:
-		return "WARN"
 	case EROR_LVL:
 		return "EROR"
 	}

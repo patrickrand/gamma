@@ -34,12 +34,10 @@ func loadAgentFromConfig(cfg Config) (*Agent, error) {
 
 		data, err := json.Marshal(m)
 		if err != nil {
-			log.EROR("agent", "Marshalling error (%s) for monitor", err.Error())
 			return nil, err
 		}
 		err = json.Unmarshal(data, monit)
 		if err != nil {
-			log.EROR("agent", "Unmarshalling error (%s) for monitor", err.Error())
 			return nil, err
 		}
 
@@ -53,13 +51,11 @@ func loadAgentFromConfig(cfg Config) (*Agent, error) {
 
 		data, err := json.Marshal(h)
 		if err != nil {
-			log.EROR("agent", "Marshalling error (%s) for handler", err.Error())
 			return nil, err
 		}
 
 		err = json.Unmarshal(data, handlr)
 		if err != nil {
-			log.EROR("agent", "Unmarshalling error (%s) for handler", err.Error())
 			return nil, err
 		}
 
