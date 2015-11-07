@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"github.com/patrickrand/gamma/agent"
 	log "github.com/patrickrand/gamma/log"
 	"github.com/patrickrand/gamma/result"
@@ -22,6 +23,13 @@ func main() {
 	if err != nil {
 		log.EROR("main", "Exiting Gamma... => %s", err.Error())
 		panic("")
+	}
+
+	logLevel := flag.String("log", "info", "Log level")
+	flag.Parse()
+	switch *logLevel {
+	case "debug":
+		log.SetLevel(-1)
 	}
 
 	handle(exec(agent))

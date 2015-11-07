@@ -23,7 +23,7 @@ const (
 )
 
 var (
-	l = newLogger(time.RFC3339, os.Stderr, DBUG_LVL)
+	l = newLogger(time.RFC3339, os.Stderr, INFO_LVL)
 )
 
 func newLogger(timestamp string, out io.Writer, level int) *logger {
