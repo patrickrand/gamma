@@ -25,10 +25,8 @@ func main() {
 		panic("")
 	}
 
-	logLevel := flag.String("log", "info", "Log level")
-	flag.Parse()
-	switch *logLevel {
-	case "debug":
+	debug := flag.Bool("debug", false, "Debug mode")
+	if flag.Parse(); *debug {
 		log.SetLevel(-1)
 	}
 
