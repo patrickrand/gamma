@@ -8,6 +8,7 @@ import (
 )
 
 type Config struct {
+	FilePath     string
 	AgentName    string                 `json:"agent_name"`
 	AgentVersion string                 `json:"agent_version"`
 	Monitors     map[string]interface{} `json:"monitors"`
@@ -15,7 +16,7 @@ type Config struct {
 }
 
 func NewConfigFromFile(file string) (cfg Config, err error) {
-	log.DBUG("config", "NewConfigFromFile => %s", file)
+	log.DBUG(AGENT, "config.NewConfigFromFile => %s", file)
 
 	absPath, err := filepath.Abs(file)
 	if err != nil {
@@ -32,6 +33,7 @@ func NewConfigFromFile(file string) (cfg Config, err error) {
 		return
 	}
 
-	log.INFO("config", "Loaded config from file => %s", absPath)
+	cfg.FilePath = absPath
+	log.INFO(AGENT, "Loaded config from file: %s", cfg.FilePath)
 	return
 }

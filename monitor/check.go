@@ -10,8 +10,17 @@ import (
 const CHECK = "check"
 
 type Check struct {
+	id         string
 	Action     `json:"action"`
 	HandlerIds []string `json:"handler_ids"`
+}
+
+func NewCheck(id string) *Check {
+	return &Check{id: id}
+}
+
+func (c *Check) ID() string {
+	return c.id
 }
 
 func (c *Check) Type() string {
@@ -19,7 +28,7 @@ func (c *Check) Type() string {
 }
 
 func (c *Check) Exec() *result.Result {
-	log.DBUG("check", "(*Check).Exec => (%s)", log.PrintJson(c))
+	log.DBUG(MONITOR, "(*Check).Exec => (%s)", log.PrintJson(c))
 
 	res := result.New(time.Now())
 

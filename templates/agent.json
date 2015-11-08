@@ -9,7 +9,7 @@
                 "command_args": ["/home/patrrand/py-check.py"],
                 "interval": 60
             },
-           "handler_ids": ["h_http"]
+           "handler_ids": ["h_stdout"]
         },
         "mem_check": {
             "type": "check",
@@ -18,17 +18,18 @@
                 "command_args": ["/home/patrrand/go-ws/src/github.com/patrickrand/gamma/monitor/checks/monitor-mem.sh","-c 90 -w 80" ],
                 "interval": 60
             },
-            "handler_ids": ["h_http"]
+            "handler_ids": ["h_stdout"]
         }     
     },
     "handlers": { 
         "h_http" : {
             "type": "http",
-            "destination": {                
-                "host": "localhost",
-                "port": 80,
-                "subpath": ""
-            },
+            "destination": "localhost",                
+            "parameters": {}
+        },
+        "h_stdout": {
+            "type": "stdout",
+            "destination": "",
             "parameters": {}
         }
     }
