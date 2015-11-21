@@ -18,14 +18,14 @@ type Agent struct {
 }
 
 func New(cfg Config) (*Agent, error) {
-	log.Infof(AGENT, "Creating new agent from config %s", cfg.FilePath)
+	log.Infof("[%s] Creating new agent from config %s", AGENT, cfg.FilePath)
 	agent := &Agent{}
 	err := loadAgentFromConfig(cfg, agent)
 	return agent, err
 }
 
 func loadAgentFromConfig(cfg Config, agent *Agent) (err error) {
-	log.Debugf(AGENT, "agent.loadAgentFromConfig => %s", log.PrintJson(cfg))
+	log.Debugf("[%s] agent.loadAgentFromConfig => %s", AGENT, log.PrintJson(cfg))
 
 	if agent.Name = cfg.AgentName; agent.Name == "" {
 		return fmt.Errorf("Agent name is required")
@@ -39,8 +39,7 @@ func loadAgentFromConfig(cfg Config, agent *Agent) (err error) {
 			return fmt.Errorf("Unable to parse JSON for monitor %s", id)
 		}
 
-		agent.Monitors[id], err = monitor.New(m["type"].(string))
-		if err != nil {
+		if agent.Monitors[id], err = monitor.New(m["type"].(string)); err != nil {
 			return err
 		}
 
@@ -49,8 +48,7 @@ func loadAgentFromConfig(cfg Config, agent *Agent) (err error) {
 			return err
 		}
 
-		err = json.Unmarshal(data, agent.Monitors[id])
-		if err != nil {
+		if err = json.Unmarshal(data, agent.Monitors[id]); err != nil {
 			return err
 		}
 
@@ -63,8 +61,8 @@ func loadAgentFromConfig(cfg Config, agent *Agent) (err error) {
 		if !ok {
 			return fmt.Errorf("Unable to parse JSON for handler %s", id)
 		}
-		contexts[id] = handler.NewContext()
 
+		contexts[id] = handler.NewContext()
 		if contexts[id].Destination, ok = h["destination"].(string); !ok {
 			return fmt.Errorf("Destination not specified for handler %v", id)
 		}
@@ -77,7 +75,7 @@ func loadAgentFromConfig(cfg Config, agent *Agent) (err error) {
 			return fmt.Errorf("Invalid handler type for handler %s", id)
 		}
 
-		log.Infof(AGENT, "Added new agent handler context %s: %v", id, contexts[id])
+		log.Infof("[%s] Added new agent handler context %s: %v", AGENT, id, contexts[id])
 	}
 
 	agent.Handlers = make(map[string][]*handler.Context)

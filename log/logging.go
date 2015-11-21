@@ -17,14 +17,6 @@ type logger struct {
 	sync.Mutex
 }
 
-type LogLevel int
-
-const (
-	DBUG_LVL LogLevel = iota - 1
-	INFO_LVL
-	EROR_LVL
-)
-
 var l = logger{
 	timestamp: time.RFC3339,
 	out:       os.Stderr,
@@ -35,16 +27,16 @@ func init() {
 	l.Logger = log.New(l.out, "", 0)
 }
 
-func Debugf(tag, format string, val ...interface{}) {
-	l.write(DBUG_LVL, tag, format, val...)
+func Debugf(format string, val ...interface{}) {
+	l.write(DBUG_LVL, format, val...)
 }
 
-func Infof(tag, format string, val ...interface{}) {
-	l.write(INFO_LVL, tag, format, val...)
+func Infof(format string, val ...interface{}) {
+	l.write(INFO_LVL, format, val...)
 }
 
-func Errorf(tag, format string, val ...interface{}) {
-	l.write(EROR_LVL, tag, format, val...)
+func Errorf(format string, val ...interface{}) {
+	l.write(EROR_LVL, format, val...)
 }
 
 func PrintJson(data interface{}) string {
@@ -52,35 +44,44 @@ func PrintJson(data interface{}) string {
 	return string(js)
 }
 
-func (l logger) write(lvl LogLevel, tag, format string, val ...interface{}) {
+func (l *logger) write(lvl LogLevel, format string, val ...interface{}) {
 	l.Lock()
 	defer l.Unlock()
 	if lvl >= l.level {
-		if tag != "" {
-			format = fmt.Sprintf("%s  [%s] [%s] %s", time.Now().Format(l.timestamp), lvl.String(), tag, format)
-		} else {
-			format = fmt.Sprintf("%s [%s] %s", time.Now().Format(l.timestamp), lvl.String(), format)
-		}
-
+		format = fmt.Sprintf("%s [%s] %s", time.Now().Format(l.timestamp), lvl.String(), format)
 		l.Logger.Printf(format, val...)
 	}
 }
 
 func Level() LogLevel {
+	return l.logLevel()
+}
+
+func (l *logger) logLevel() LogLevel {
 	l.Lock()
 	defer l.Unlock()
 	return l.level
 }
 
 func SetLevel(lvl LogLevel) {
+	l.setLevel(lvl)
+}
+
+func (l *logger) setLevel(lvl LogLevel) {
 	l.Lock()
 	defer l.Unlock()
 	l.level = lvl
 }
 
+type LogLevel int
+
+const (
+	DBUG_LVL LogLevel = iota - 1
+	INFO_LVL
+	EROR_LVL
+)
+
 func (lvl LogLevel) String() string {
-	l.Lock()
-	defer l.Unlock()
 	switch lvl {
 	case DBUG_LVL:
 		return "DBUG"

@@ -15,25 +15,25 @@ type Config struct {
 	Handlers     map[string]interface{} `json:"handlers"`
 }
 
-func NewConfigFromFile(file string) (cfg Config, err error) {
-	log.Debugf(AGENT, "config.NewConfigFromFile => %s", file)
+func NewConfigFromFile(file string) (Config, error) {
+	log.Debugf("[%s] config.NewConfigFromFile => %s", AGENT, file)
 
+	var cfg Config
 	absPath, err := filepath.Abs(file)
 	if err != nil {
-		return
+		return cfg, err
 	}
 
 	configFile, err := os.Open(absPath)
 	if err != nil {
-		return
+		return cfg, err
 	}
 
-	err = json.NewDecoder(configFile).Decode(&cfg)
-	if err != nil {
-		return
+	if err = json.NewDecoder(configFile).Decode(&cfg); err != nil {
+		return cfg, err
 	}
 
 	cfg.FilePath = absPath
-	log.Infof(AGENT, "Loaded config from file: %s", cfg.FilePath)
-	return
+	log.Infof("[%s] Loaded config from file: %s", AGENT, cfg.FilePath)
+	return cfg, err
 }

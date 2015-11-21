@@ -13,27 +13,29 @@ var (
 type Parameters map[string]interface{}
 
 func (p Parameters) Get(key string, result interface{}) error {
-	log.Debugf(HANDLER, "(Parameters).Get => (%+v).%s, %+v", p, key, result)
+	log.Debugf("[%s] (Parameters).Get => (%+v).%s, %+v", HANDLER, p, key, result)
 
-	if value, ok := p[key]; !ok {
+	value, ok := p[key]
+	if !ok {
 		return ErrKeyNotFound
-	} else {
-		data, err := json.Marshal(value)
-		if err != nil {
-			return err
-		}
-
-		return json.Unmarshal(data, &result)
 	}
+
+	data, err := json.Marshal(value)
+	if err != nil {
+		return err
+	}
+
+	return json.Unmarshal(data, &result)
+
 }
 
 func (p Parameters) Set(key string, value interface{}) {
-	log.Debugf(HANDLER, "(Parameters).Set => (%+v).%s, %+v", p, key, value)
+	log.Debugf("[%s] (Parameters).Set => (%+v).%s, %+v", HANDLER, p, key, value)
 	p[key] = value
 }
 
 func (p Parameters) Delete(key string) interface{} {
-	log.Debugf(HANDLER, "(Parameters).Delete => (%+v).%s", p, key)
+	log.Debugf("[%s] (Parameters).Delete => (%+v).%s", HANDLER, p, key)
 
 	if value, ok := p[key]; ok {
 		delete(p, key)

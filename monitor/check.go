@@ -28,10 +28,9 @@ func (c *Check) Type() string {
 }
 
 func (c *Check) Exec() *result.Result {
-	log.Debugf(MONITOR, "(*Check).Exec => (%s)", log.PrintJson(c))
+	log.Debugf("[%s] (*Check).Exec => (%s)", MONITOR, log.PrintJson(c))
 
 	res := result.New(time.Now())
-
 	output, err := c.Action.Run()
 	if err != nil {
 		res.Error = err
@@ -46,8 +45,8 @@ func (c *Check) Exec() *result.Result {
 			res.Error = fmt.Errorf("Invalid output status: %d", output.Status)
 		}
 	}
-
 	res.EndTime = time.Now()
+
 	return res
 }
 

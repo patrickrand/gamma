@@ -17,22 +17,22 @@ const (
 var Agent *agent.Agent
 
 func main() {
-	log.Infof(MAIN, "Starting Gamma...")
+	log.Infof("[%s] Starting Gamma...", MAIN)
 
 	debug := flag.Bool("debug", false, "Debug mode")
 	if flag.Parse(); *debug {
-		log.SetLevel(-1)
+		log.SetLevel(log.DBUG_LVL)
 	}
 
 	cfg, err := agent.NewConfigFromFile(CONFIG_FILE)
 	if err != nil {
-		log.Errorf(MAIN, "Exiting Gamma... => %s", err.Error())
+		log.Errorf("[%s] Exiting Gamma... => %s", MAIN, err.Error())
 		os.Exit(1)
 	}
 
 	Agent, err = agent.New(cfg)
 	if err != nil {
-		log.Errorf(MAIN, "Exiting Gamma... => %s", err.Error())
+		log.Errorf("[%s] Exiting Gamma... => %s", MAIN, err.Error())
 		os.Exit(1)
 	}
 
@@ -44,7 +44,7 @@ func exec() <-chan result.Result {
 	go func() {
 		for k, m := range Agent.Monitors {
 			js, _ := json.Marshal(m)
-			log.Debugf(MAIN, "main.exec => %s", string(js))
+			log.Debugf("[%s] main.exec => %s", MAIN, string(js))
 			res := m.Exec()
 			res.MonitorId = string(k)
 			if res.Error != nil {
@@ -60,11 +60,11 @@ func exec() <-chan result.Result {
 
 func handle(in <-chan result.Result) {
 	for r := range in {
-		log.Debugf(MAIN, "handle => %+v", r)
+		log.Debugf("[%s] handle => %+v", MAIN, r)
 		for _, h := range Agent.Handlers[r.MonitorId] {
 			h.Handle(r)
 			if h.Error != nil {
-				log.Errorf(MAIN, "handle => %s", h.Error.Error())
+				log.Errorf("[%s] handle => %s", MAIN, h.Error.Error())
 			}
 		}
 	}

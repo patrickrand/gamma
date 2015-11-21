@@ -32,8 +32,8 @@ var HttpHandler = func(data interface{}, dest string, params Parameters) error {
 	if err != nil {
 		return err
 	}
-
 	defer resp.Body.Close()
+
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return err
@@ -44,9 +44,7 @@ var HttpHandler = func(data interface{}, dest string, params Parameters) error {
 }
 
 var StdoutHandler = func(data interface{}, dest string, params Parameters) error {
-	enc := json.NewEncoder(os.Stdout)
-	return enc.Encode(data)
-
+	return json.NewEncoder(os.Stdout).Encode(data)
 }
 
 var Handlers = map[string]HandlerFunc{

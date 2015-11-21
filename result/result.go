@@ -6,6 +6,7 @@ import (
 )
 
 const (
+	RESULT    = "RESU"
 	StatusErr = iota - 1
 	StatusOK
 	StatusWarning
@@ -22,6 +23,6 @@ type Result struct {
 }
 
 func New(startTime time.Time) *Result {
-	log.Debugf("result", "result.New => %s", startTime.String())
+	log.Debugf("[%s] result.New => %s", RESULT, startTime.String())
 	return &Result{StartTime: startTime}
 }
