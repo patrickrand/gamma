@@ -3,43 +3,48 @@ package log
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"log"
 	"os"
+	"sync"
 	"time"
 )
 
 type logger struct {
 	timestamp string
-	out       io.Writer
-	level     int
+	out       *os.File
+	level     LogLevel
+	*log.Logger
+	sync.Mutex
 }
 
+type LogLevel int
+
 const (
-	DBUG_LVL = iota - 1
+	DBUG_LVL LogLevel = iota - 1
 	INFO_LVL
 	EROR_LVL
 )
 
-var (
-	l = newLogger(time.RFC3339, os.Stderr, INFO_LVL)
-)
-
-func newLogger(timestamp string, out io.Writer, level int) *logger {
-	log.SetFlags(0)
-	return &logger{timestamp: timestamp, out: out, level: level}
+var l = logger{
+	timestamp: time.RFC3339,
+	out:       os.Stderr,
+	level:     INFO_LVL,
 }
 
-func DBUG(tag, format string, val ...interface{}) {
-	write(DBUG_LVL, tag, format, val...)
+func init() {
+	l.Logger = log.New(l.out, "", 0)
 }
 
-func INFO(tag, format string, val ...interface{}) {
-	write(INFO_LVL, tag, format, val...)
+func Debugf(tag, format string, val ...interface{}) {
+	l.write(DBUG_LVL, tag, format, val...)
 }
 
-func EROR(tag, format string, val ...interface{}) {
-	write(EROR_LVL, tag, format, val...)
+func Infof(tag, format string, val ...interface{}) {
+	l.write(INFO_LVL, tag, format, val...)
+}
+
+func Errorf(tag, format string, val ...interface{}) {
+	l.write(EROR_LVL, tag, format, val...)
 }
 
 func PrintJson(data interface{}) string {
@@ -47,29 +52,35 @@ func PrintJson(data interface{}) string {
 	return string(js)
 }
 
-func write(lvl int, tag, format string, val ...interface{}) {
+func (l logger) write(lvl LogLevel, tag, format string, val ...interface{}) {
+	l.Lock()
+	defer l.Unlock()
 	if lvl >= l.level {
 		if tag != "" {
-			format = fmt.Sprintf("%s  [%s] [%s] %s", time.Now().Format(l.timestamp), PrintLevel(lvl), tag, format)
+			format = fmt.Sprintf("%s  [%s] [%s] %s", time.Now().Format(l.timestamp), lvl.String(), tag, format)
 		} else {
-			format = fmt.Sprintf("%s [%s] %s", time.Now().Format(l.timestamp), PrintLevel(lvl), format)
+			format = fmt.Sprintf("%s [%s] %s", time.Now().Format(l.timestamp), lvl.String(), format)
 		}
 
-		log.Printf(format, val...)
+		l.Logger.Printf(format, val...)
 	}
 }
 
-func Level() int {
+func Level() LogLevel {
+	l.Lock()
+	defer l.Unlock()
 	return l.level
 }
 
-func SetLevel(lvl int) {
-	if lvl >= DBUG_LVL && lvl <= EROR_LVL {
-		l.level = lvl
-	}
+func SetLevel(lvl LogLevel) {
+	l.Lock()
+	defer l.Unlock()
+	l.level = lvl
 }
 
-func PrintLevel(lvl int) string {
+func (lvl LogLevel) String() string {
+	l.Lock()
+	defer l.Unlock()
 	switch lvl {
 	case DBUG_LVL:
 		return "DBUG"

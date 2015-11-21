@@ -18,14 +18,14 @@ type Agent struct {
 }
 
 func New(cfg Config) (*Agent, error) {
-	log.INFO(AGENT, "Creating new agent from config %s", cfg.FilePath)
+	log.Infof(AGENT, "Creating new agent from config %s", cfg.FilePath)
 	agent := &Agent{}
 	err := loadAgentFromConfig(cfg, agent)
 	return agent, err
 }
 
 func loadAgentFromConfig(cfg Config, agent *Agent) (err error) {
-	log.DBUG(AGENT, "agent.loadAgentFromConfig => %s", log.PrintJson(cfg))
+	log.Debugf(AGENT, "agent.loadAgentFromConfig => %s", log.PrintJson(cfg))
 
 	if agent.Name = cfg.AgentName; agent.Name == "" {
 		return fmt.Errorf("Agent name is required")
@@ -54,7 +54,7 @@ func loadAgentFromConfig(cfg Config, agent *Agent) (err error) {
 			return err
 		}
 
-		log.INFO(AGENT, "Added new monitor %v: %s", id, log.PrintJson(agent.Monitors[id]))
+		log.Infof(AGENT, "Added new monitor %v: %s", id, log.PrintJson(agent.Monitors[id]))
 	}
 
 	contexts := make(map[string]*handler.Context, 0)
@@ -77,7 +77,7 @@ func loadAgentFromConfig(cfg Config, agent *Agent) (err error) {
 			return fmt.Errorf("Invalid handler type for handler %s", id)
 		}
 
-		log.INFO(AGENT, "Added new agent handler context %s: %v", id, contexts[id])
+		log.Infof(AGENT, "Added new agent handler context %s: %v", id, contexts[id])
 	}
 
 	agent.Handlers = make(map[string][]*handler.Context)

@@ -22,6 +22,6 @@ type Result struct {
 }
 
 func New(startTime time.Time) *Result {
-	log.DBUG("result", "result.New => %s", startTime.String())
+	log.Debugf("result", "result.New => %s", startTime.String())
 	return &Result{StartTime: startTime}
 }

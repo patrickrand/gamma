@@ -13,7 +13,7 @@ var (
 type Parameters map[string]interface{}
 
 func (p Parameters) Get(key string, result interface{}) error {
-	log.DBUG(HANDLER, "(Parameters).Get => (%+v).%s, %+v", p, key, result)
+	log.Debugf(HANDLER, "(Parameters).Get => (%+v).%s, %+v", p, key, result)
 
 	if value, ok := p[key]; !ok {
 		return ErrKeyNotFound
@@ -28,12 +28,12 @@ func (p Parameters) Get(key string, result interface{}) error {
 }
 
 func (p Parameters) Set(key string, value interface{}) {
-	log.DBUG(HANDLER, "(Parameters).Set => (%+v).%s, %+v", p, key, value)
+	log.Debugf(HANDLER, "(Parameters).Set => (%+v).%s, %+v", p, key, value)
 	p[key] = value
 }
 
 func (p Parameters) Delete(key string) interface{} {
-	log.DBUG(HANDLER, "(Parameters).Delete => (%+v).%s", p, key)
+	log.Debugf(HANDLER, "(Parameters).Delete => (%+v).%s", p, key)
 
 	if value, ok := p[key]; ok {
 		delete(p, key)

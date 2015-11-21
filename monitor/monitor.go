@@ -18,7 +18,7 @@ type Monitor interface {
 }
 
 func New(monitorType string) (Monitor, error) {
-	log.DBUG(MONITOR, "monitor.New => %s", monitorType)
+	log.Debugf(MONITOR, "monitor.New => %s", monitorType)
 	switch monitorType {
 	case CHECK:
 		return &Check{}, nil

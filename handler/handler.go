@@ -39,7 +39,7 @@ var HttpHandler = func(data interface{}, dest string, params Parameters) error {
 		return err
 	}
 
-	log.INFO(HANDLER, "%s %s", resp.Status, string(body))
+	log.Infof(HANDLER, "%s %s", resp.Status, string(body))
 	return nil
 }
 

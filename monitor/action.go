@@ -20,7 +20,7 @@ type Action struct {
 }
 
 func (a *Action) Run() (output Output, err error) {
-	log.DBUG(MONITOR, "(*Action).Run => (%s)", log.PrintJson(a))
+	log.Debugf(MONITOR, "(*Action).Run => (%s)", log.PrintJson(a))
 
 	b, err := exec.Command(a.CommandPath, a.CommandArgs...).Output()
 	if err != nil {

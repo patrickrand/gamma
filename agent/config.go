@@ -16,7 +16,7 @@ type Config struct {
 }
 
 func NewConfigFromFile(file string) (cfg Config, err error) {
-	log.DBUG(AGENT, "config.NewConfigFromFile => %s", file)
+	log.Debugf(AGENT, "config.NewConfigFromFile => %s", file)
 
 	absPath, err := filepath.Abs(file)
 	if err != nil {
@@ -34,6 +34,6 @@ func NewConfigFromFile(file string) (cfg Config, err error) {
 	}
 
 	cfg.FilePath = absPath
-	log.INFO(AGENT, "Loaded config from file: %s", cfg.FilePath)
+	log.Infof(AGENT, "Loaded config from file: %s", cfg.FilePath)
 	return
 }

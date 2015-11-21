@@ -28,7 +28,7 @@ func (c *Check) Type() string {
 }
 
 func (c *Check) Exec() *result.Result {
-	log.DBUG(MONITOR, "(*Check).Exec => (%s)", log.PrintJson(c))
+	log.Debugf(MONITOR, "(*Check).Exec => (%s)", log.PrintJson(c))
 
 	res := result.New(time.Now())
 
