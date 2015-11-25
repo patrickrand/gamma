@@ -1,9 +1,8 @@
-package monitor
+package agent
 
 import (
 	"bytes"
 	"encoding/json"
-	log "github.com/patrickrand/gamma/log"
 	"os/exec"
 	"time"
 )
@@ -19,12 +18,10 @@ type Action struct {
 	Interval    time.Duration `json:"interval"`
 }
 
-func (a *Action) Run() (Output, error) {
-	log.Debugf("[%s] (*Action).Run => (%s)", MONITOR, log.PrintJson(a))
+func (a *Action) Run() (output Output, err error) {
+	log.Debugf("(*Action).Run => (%s)", log.PrintJson(a))
 
-	var output Output
-	b, err := exec.Command(a.CommandPath, a.CommandArgs...).Output()
-	if err == nil {
+	if b, err := exec.Command(a.CommandPath, a.CommandArgs...).Output(); err == nil {
 		err = json.NewDecoder(bytes.NewReader(b)).Decode(&output)
 	}
 

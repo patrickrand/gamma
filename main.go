@@ -2,53 +2,52 @@ package main
 
 import (
 	"encoding/json"
-	"flag"
+	//	"flag"
 	"github.com/patrickrand/gamma/agent"
-	log "github.com/patrickrand/gamma/log"
-	"github.com/patrickrand/gamma/result"
+	"log"
 	"os"
 )
 
 const (
 	MAIN        = "MAIN"
-	CONFIG_FILE = "/home/patrrand/go-ws/src/github.com/patrickrand/gamma/templates/agent.json"
+	CONFIG_FILE = "templates/agent.json"
 )
 
 var Agent *agent.Agent
 
 func main() {
-	log.Infof("[%s] Starting Gamma...", MAIN)
+	log.Printf("[%s] Starting Gamma...", MAIN)
 
-	debug := flag.Bool("debug", false, "Debug mode")
-	if flag.Parse(); *debug {
-		log.SetLevel(log.DBUG_LVL)
-	}
+	//debug := flag.Bool("debug", false, "Debug mode")
+	//if flag.Parse(); *debug {
+	//	log.SetLevel(log.DBUG_LVL)
+	//}
 
 	cfg, err := agent.NewConfigFromFile(CONFIG_FILE)
 	if err != nil {
-		log.Errorf("[%s] Exiting Gamma... => %s", MAIN, err.Error())
+		log.Printf("[%s] Exiting Gamma... => %s", MAIN, err.Error())
 		os.Exit(1)
 	}
 
 	Agent, err = agent.New(cfg)
 	if err != nil {
-		log.Errorf("[%s] Exiting Gamma... => %s", MAIN, err.Error())
+		log.Printf("[%s] Exiting Gamma... => %s", MAIN, err.Error())
 		os.Exit(1)
 	}
 
 	handle(exec())
 }
 
-func exec() <-chan result.Result {
-	out := make(chan result.Result)
+func exec() <-chan agent.Result {
+	out := make(chan agent.Result)
 	go func() {
-		for k, m := range Agent.Monitors {
+		for k, m := range Agent.Checks {
 			js, _ := json.Marshal(m)
-			log.Debugf("[%s] main.exec => %s", MAIN, string(js))
+			log.Printf("[%s] main.exec => %s", MAIN, string(js))
 			res := m.Exec()
-			res.MonitorId = string(k)
+			res.CheckId = string(k)
 			if res.Error != nil {
-				res.Status = result.StatusErr
+				res.Status = agent.StatusErr
 			}
 
 			out <- *res
@@ -58,13 +57,13 @@ func exec() <-chan result.Result {
 	return out
 }
 
-func handle(in <-chan result.Result) {
+func handle(in <-chan agent.Result) {
 	for r := range in {
-		log.Debugf("[%s] handle => %+v", MAIN, r)
-		for _, h := range Agent.Handlers[r.MonitorId] {
+		log.Printf("[%s] handle => %+v", MAIN, r)
+		for _, h := range Agent.Handlers[r.CheckId] {
 			h.Handle(r)
 			if h.Error != nil {
-				log.Errorf("[%s] handle => %s", MAIN, h.Error.Error())
+				log.Printf("[%s] handle => %s", MAIN, h.Error.Error())
 			}
 		}
 	}

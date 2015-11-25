@@ -1,19 +1,16 @@
-package handler
+package agent
 
 import (
 	"bytes"
 	"encoding/json"
-	log "github.com/patrickrand/gamma/log"
 	"io/ioutil"
 	"net/http"
 	"os"
 )
 
-const HANDLER = "HNDL"
-
 type HandlerFunc func(data interface{}, dest string, params Parameters) error
 
-var HttpHandler = func(data interface{}, dest string, params Parameters) error {
+func HttpHandler(data interface{}, dest string, params Parameters) error {
 	if dest == "" {
 		dest = "127.0.0.1"
 	}
@@ -25,7 +22,7 @@ var HttpHandler = func(data interface{}, dest string, params Parameters) error {
 
 	req, err := http.NewRequest("POST", dest, bytes.NewBuffer(b))
 	if err != nil {
-		return nil
+		return err
 	}
 
 	resp, err := http.DefaultClient.Do(req)
@@ -39,7 +36,7 @@ var HttpHandler = func(data interface{}, dest string, params Parameters) error {
 		return err
 	}
 
-	log.Infof(HANDLER, "%s %s", resp.Status, string(body))
+	log.Infof("%s %s", resp.Status, string(body))
 	return nil
 }
 

@@ -1,9 +1,9 @@
-package log
+package agent
 
 import (
 	"encoding/json"
 	"fmt"
-	"log"
+	stdlog "log"
 	"os"
 	"sync"
 	"time"
@@ -13,33 +13,33 @@ type logger struct {
 	timestamp string
 	out       *os.File
 	level     LogLevel
-	*log.Logger
+	*stdlog.Logger
 	sync.Mutex
 }
 
-var l = logger{
+var log = logger{
 	timestamp: time.RFC3339,
 	out:       os.Stderr,
 	level:     INFO_LVL,
 }
 
 func init() {
-	l.Logger = log.New(l.out, "", 0)
+	log.Logger = stdlog.New(log.out, "", 0)
 }
 
-func Debugf(format string, val ...interface{}) {
+func (l *logger) Debugf(format string, val ...interface{}) {
 	l.write(DBUG_LVL, format, val...)
 }
 
-func Infof(format string, val ...interface{}) {
+func (l *logger) Infof(format string, val ...interface{}) {
 	l.write(INFO_LVL, format, val...)
 }
 
-func Errorf(format string, val ...interface{}) {
+func (l *logger) Errorf(format string, val ...interface{}) {
 	l.write(EROR_LVL, format, val...)
 }
 
-func PrintJson(data interface{}) string {
+func (l *logger) PrintJson(data interface{}) string {
 	js, _ := json.Marshal(data)
 	return string(js)
 }
@@ -53,21 +53,13 @@ func (l *logger) write(lvl LogLevel, format string, val ...interface{}) {
 	}
 }
 
-func Level() LogLevel {
-	return l.logLevel()
-}
-
-func (l *logger) logLevel() LogLevel {
+func (l *logger) Level() LogLevel {
 	l.Lock()
 	defer l.Unlock()
 	return l.level
 }
 
-func SetLevel(lvl LogLevel) {
-	l.setLevel(lvl)
-}
-
-func (l *logger) setLevel(lvl LogLevel) {
+func (l *logger) SetLevel(lvl LogLevel) {
 	l.Lock()
 	defer l.Unlock()
 	l.level = lvl

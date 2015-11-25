@@ -3,86 +3,80 @@ package agent
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/patrickrand/gamma/handler"
-	log "github.com/patrickrand/gamma/log"
-	"github.com/patrickrand/gamma/monitor"
 )
-
-const AGENT = "AGNT"
 
 type Agent struct {
 	Name     string
 	Version  string
-	Monitors map[string]monitor.Monitor
-	Handlers map[string][]*handler.Context
+	Checks   map[string]*Check
+	Handlers map[string][]Context
 }
 
 func New(cfg Config) (*Agent, error) {
-	log.Infof("[%s] Creating new agent from config %s", AGENT, cfg.FilePath)
+	log.Infof("Creating new agent from config %s", cfg.FilePath)
 	agent := &Agent{}
 	err := loadAgentFromConfig(cfg, agent)
 	return agent, err
 }
 
 func loadAgentFromConfig(cfg Config, agent *Agent) (err error) {
-	log.Debugf("[%s] agent.loadAgentFromConfig => %s", AGENT, log.PrintJson(cfg))
+	log.Debugf("agent.loadAgentFromConfig => %s", log.PrintJson(cfg))
 
 	if agent.Name = cfg.AgentName; agent.Name == "" {
 		return fmt.Errorf("Agent name is required")
 	}
 	agent.Version = cfg.AgentVersion
 
-	agent.Monitors = make(map[string]monitor.Monitor, 0)
-	for id, m := range cfg.Monitors {
-		m, ok := m.(map[string]interface{})
+	agent.Checks = make(map[string]*Check, 0)
+	for id, c := range cfg.Checks {
+		c, ok := c.(map[string]interface{})
 		if !ok {
-			return fmt.Errorf("Unable to parse JSON for monitor %s", id)
+			return fmt.Errorf("unable to parse JSON for check: %s", id)
 		}
 
-		if agent.Monitors[id], err = monitor.New(m["type"].(string)); err != nil {
-			return err
-		}
-
-		data, err := json.Marshal(m)
+		data, err := json.Marshal(c)
 		if err != nil {
 			return err
 		}
 
-		if err = json.Unmarshal(data, agent.Monitors[id]); err != nil {
+		ch := new(Check)
+		if err = json.Unmarshal(data, ch); err != nil {
 			return err
 		}
-
-		log.Infof(AGENT, "Added new monitor %v: %s", id, log.PrintJson(agent.Monitors[id]))
+		agent.Checks[id] = ch
+		log.Infof("Added check %s: %s", id, log.PrintJson(agent.Checks[id]))
 	}
 
-	contexts := make(map[string]*handler.Context, 0)
+	contexts := make(map[string]*Context, 0)
 	for id, h := range cfg.Handlers {
 		h, ok := h.(map[string]interface{})
 		if !ok {
-			return fmt.Errorf("Unable to parse JSON for handler %s", id)
+			return fmt.Errorf("unable to parse JSON for handler: %s", id)
 		}
 
-		contexts[id] = handler.NewContext()
-		if contexts[id].Destination, ok = h["destination"].(string); !ok {
-			return fmt.Errorf("Destination not specified for handler %v", id)
+		contexts[id] = NewContext()
+		dest, ok := h["destination"].(string)
+		if !ok {
+			return fmt.Errorf("destination not specified for handler: %s", id)
 		}
+		contexts[id].Destination = dest
 
 		if p, ok := h["parameters"].(map[string]interface{}); ok {
-			contexts[id].Parameters = handler.Parameters(p)
+			contexts[id].Parameters = Parameters(p)
 		}
 
-		if contexts[id].HandlerFunc, ok = handler.Handlers[h["type"].(string)]; !ok {
-			return fmt.Errorf("Invalid handler type for handler %s", id)
+		if contexts[id].HandlerFunc, ok = Handlers[h["type"].(string)]; !ok {
+			return fmt.Errorf("invalid handler type: %s", id)
 		}
 
-		log.Infof("[%s] Added new agent handler context %s: %v", AGENT, id, contexts[id])
+		log.Infof("Added agent handler context %s: %s", id, contexts[id])
 	}
 
-	agent.Handlers = make(map[string][]*handler.Context)
-	for id, m := range agent.Monitors {
-		ctxList := make([]*handler.Context, 0)
-		for _, h := range m.Handlers() {
-			ctxList = append(ctxList, contexts[h])
+	agent.Handlers = make(map[string][]Context)
+	for id, c := range agent.Checks {
+		ctxList := make([]Context, 0)
+		for _, h := range c.Handlers() {
+			ctxList = append(ctxList, *contexts[h])
 		}
 		agent.Handlers[id] = ctxList
 	}

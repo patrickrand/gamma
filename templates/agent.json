@@ -1,9 +1,8 @@
 {
     "agent_name": "my_agent",
     "agent_version": "0.1.0",
-    "monitors": {
+    "checks": {
         "py_check": {
-            "type": "check",
             "action": {
                 "command_path": "/usr/bin/python",
                 "command_args": ["/home/patrrand/py-check.py"],
@@ -12,7 +11,6 @@
            "handler_ids": ["h_stdout"]
         },
         "mem_check": {
-            "type": "check",
             "action": {
                 "command_path": "/usr/bin/bash",
                 "command_args": ["/home/patrrand/go-ws/src/github.com/patrickrand/gamma/monitor/checks/monitor-mem.sh","-c 90 -w 80" ],

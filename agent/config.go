@@ -2,7 +2,6 @@ package agent
 
 import (
 	"encoding/json"
-	log "github.com/patrickrand/gamma/log"
 	"os"
 	"path/filepath"
 )
@@ -11,29 +10,28 @@ type Config struct {
 	FilePath     string
 	AgentName    string                 `json:"agent_name"`
 	AgentVersion string                 `json:"agent_version"`
-	Monitors     map[string]interface{} `json:"monitors"`
+	Checks       map[string]interface{} `json:"checks"`
 	Handlers     map[string]interface{} `json:"handlers"`
 }
 
-func NewConfigFromFile(file string) (Config, error) {
-	log.Debugf("[%s] config.NewConfigFromFile => %s", AGENT, file)
+func NewConfigFromFile(file string) (cfg Config, err error) {
+	log.Debugf("agent.NewConfigFromFile => %s", file)
 
-	var cfg Config
 	absPath, err := filepath.Abs(file)
 	if err != nil {
-		return cfg, err
+		return
 	}
 
 	configFile, err := os.Open(absPath)
 	if err != nil {
-		return cfg, err
+		return
 	}
 
 	if err = json.NewDecoder(configFile).Decode(&cfg); err != nil {
-		return cfg, err
+		return
 	}
 
 	cfg.FilePath = absPath
-	log.Infof("[%s] Loaded config from file: %s", AGENT, cfg.FilePath)
-	return cfg, err
+	log.Infof("Loaded config from file: %s", cfg.FilePath)
+	return
 }

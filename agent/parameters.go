@@ -1,19 +1,18 @@
-package handler
+package agent
 
 import (
 	"encoding/json"
 	"errors"
-	log "github.com/patrickrand/gamma/log"
 )
 
 var (
-	ErrKeyNotFound = errors.New("Key not found")
+	ErrKeyNotFound = errors.New("key not found")
 )
 
 type Parameters map[string]interface{}
 
 func (p Parameters) Get(key string, result interface{}) error {
-	log.Debugf("[%s] (Parameters).Get => (%+v).%s, %+v", HANDLER, p, key, result)
+	log.Debugf("(Parameters).Get => (%+v).%s, %+v", p, key, result)
 
 	value, ok := p[key]
 	if !ok {
@@ -30,16 +29,18 @@ func (p Parameters) Get(key string, result interface{}) error {
 }
 
 func (p Parameters) Set(key string, value interface{}) {
-	log.Debugf("[%s] (Parameters).Set => (%+v).%s, %+v", HANDLER, p, key, value)
+	log.Debugf("(Parameters).Set => (%+v).%s, %+v", p, key, value)
 	p[key] = value
 }
 
 func (p Parameters) Delete(key string) interface{} {
-	log.Debugf("[%s] (Parameters).Delete => (%+v).%s", HANDLER, p, key)
+	log.Debugf("(Parameters).Delete => (%+v).%s", p, key)
 
-	if value, ok := p[key]; ok {
-		delete(p, key)
-		return value
+	value, ok := p[key]
+	if !ok {
+		return nil
 	}
-	return nil
+
+	delete(p, key)
+	return value
 }

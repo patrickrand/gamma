@@ -1,12 +1,10 @@
-package result
+package agent
 
 import (
-	log "github.com/patrickrand/gamma/log"
 	"time"
 )
 
 const (
-	RESULT    = "RESU"
 	StatusErr = iota - 1
 	StatusOK
 	StatusWarning
@@ -14,7 +12,7 @@ const (
 )
 
 type Result struct {
-	MonitorId string    `json:"monitor_id"`
+	CheckId   string    `json:"check_id"`
 	Status    int       `json:"status"`
 	Message   string    `json:"message,omitempty"`
 	StartTime time.Time `json:"start_time"`
@@ -22,7 +20,7 @@ type Result struct {
 	Error     error     `json:"error,omitempty"`
 }
 
-func New(startTime time.Time) *Result {
-	log.Debugf("[%s] result.New => %s", RESULT, startTime.String())
+func NewResult(startTime time.Time) *Result {
+	log.Debugf("result.New => %s", startTime.String())
 	return &Result{StartTime: startTime}
 }
