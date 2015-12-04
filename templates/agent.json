@@ -1,36 +1,36 @@
 {
-    "agent_name": "my_agent",
-    "agent_version": "0.1.0",
-    "checks": {
-        "py_check": {
-            "action": {
-                "command_path": "/usr/bin/python",
-                "command_args": ["/home/patrrand/py-check.py"],
-                "interval": 60
-            },
-           "handler_ids": ["h_stdout"]
-        },
-        "mem_check": {
-            "action": {
-                "command_path": "/usr/bin/bash",
-                "command_args": ["/home/patrrand/go-ws/src/github.com/patrickrand/gamma/monitor/checks/monitor-mem.sh","-c 90 -w 80" ],
-                "interval": 60
-            },
+    "agent_id": "my_agent",
+    "host_id": "localhost",
+    "checks": [
+        {   
+            "id": "py_check",
+            "command": "/usr/bin/python /home/patrrand/py-check.py",
+            "interval": 60,
+            "alert_on": "ok/warning/critical",
             "handler_ids": ["h_stdout"]
-        }     
-    },
-    "handlers": { 
-        "h_http" : {
+        },
+        {
+            "id": "mem_check",
+            "command": "/usr/bin/bash /home/patrrand/go-ws/src/github.com/patrickrand/gamma/monitor/checks/monitor-mem.sh -c 90 -w 80",
+            "interval": 60,
+            "alert_on": "ok/warning/critical",
+            "handler_ids": ["h_stdout"]
+        }
+    ],     
+    "handlers": [ 
+        {
+            "id": "http_handler_1",
             "type": "http",
-            "destination": "localhost",                
+            "destination": "localhost:8080",                
             "parameters": {}
         },
-        "h_stdout": {
-            "type": "stdout",
-            "destination": "",
+        {
+            "id": "file_handler_1",
+            "type": "file",
+            "destination": "stdout",
             "parameters": {}
         }
-    }
+    ]
 }
 
 

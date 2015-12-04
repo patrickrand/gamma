@@ -1,7 +1,6 @@
 package agent
 
 import (
-	"encoding/json"
 	"fmt"
 )
 
@@ -9,56 +8,36 @@ type Agent struct {
 	Name     string
 	Version  string
 	Checks   map[string]*Check
+	Handlers map[string]*Handler
 	Handlers map[string][]Context
 }
 
-func New(cfg Config) (*Agent, error) {
-	log.Infof("Creating new agent from config %s", cfg.FilePath)
+func New(cfg *Config) (*Agent, error) {
 	agent := &Agent{}
 	err := loadAgentFromConfig(cfg, agent)
 	return agent, err
 }
 
-func loadAgentFromConfig(cfg Config, agent *Agent) (err error) {
-	log.Debugf("agent.loadAgentFromConfig => %s", log.PrintJson(cfg))
-
-	if agent.Name = cfg.AgentName; agent.Name == "" {
-		return fmt.Errorf("Agent name is required")
+func loadAgentFromConfig(cfg *Config, agent *Agent) (err error) {
+	if err := cfg.Get("agent_name", &agent.Name); err != nil {
+		return err
 	}
-	agent.Version = cfg.AgentVersion
 
-	agent.Checks = make(map[string]*Check, 0)
-	for id, c := range cfg.Checks {
-		c, ok := c.(map[string]interface{})
-		if !ok {
-			return fmt.Errorf("unable to parse JSON for check: %s", id)
-		}
-
-		data, err := json.Marshal(c)
-		if err != nil {
-			return err
-		}
-
-		ch := new(Check)
-		if err = json.Unmarshal(data, ch); err != nil {
-			return err
-		}
-		agent.Checks[id] = ch
-		log.Infof("Added check %s: %s", id, log.PrintJson(agent.Checks[id]))
+	if err := cfg.Get("checks", &agent.Checks); err != nil {
+		return err
 	}
+
+	log.Infof("loaded checks from config: %#s", log.PrintJson(agent.Checks))
+
+	if err := cfg.Get("handlers", &agent.Handlers); err != nil {
+		return err
+	}
+
+	log.Infof("loaded handlers from config: %#s", log.PrintJson(agent.Handlers))
 
 	contexts := make(map[string]*Context, 0)
-	for id, h := range cfg.Handlers {
-		h, ok := h.(map[string]interface{})
-		if !ok {
-			return fmt.Errorf("unable to parse JSON for handler: %s", id)
-		}
-
+	for id, h := range agent.Handlers {
 		contexts[id] = NewContext()
-		dest, ok := h["destination"].(string)
-		if !ok {
-			return fmt.Errorf("destination not specified for handler: %s", id)
-		}
 		contexts[id].Destination = dest
 
 		if p, ok := h["parameters"].(map[string]interface{}); ok {

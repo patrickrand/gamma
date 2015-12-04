@@ -7,11 +7,10 @@ import (
 )
 
 type Config struct {
-	FilePath     string
-	AgentName    string                 `json:"agent_name"`
-	AgentVersion string                 `json:"agent_version"`
-	Checks       map[string]interface{} `json:"checks"`
-	Handlers     map[string]interface{} `json:"handlers"`
+	FilePath  string
+	AgentName string                 `json:"agent_name"`
+	Checks    map[string]interface{} `json:"checks"`
+	Handlers  map[string]interface{} `json:"handlers"`
 }
 
 func NewConfigFromFile(file string) (cfg Config, err error) {
