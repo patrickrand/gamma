@@ -1,50 +1,31 @@
 package agent
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"os/exec"
 	"time"
 )
 
 type Check struct {
-	id         string
-	Action     `json:"action"`
-	HandlerIds []string `json:"handler_ids"`
-}
-
-func NewCheck(id string) *Check {
-	return &Check{id: id}
-}
-
-func (c *Check) ID() string {
-	return c.id
+	ID         string        `json:"id"`
+	Command    string        `json:"command"`
+	Interval   time.Duration `json:"interval"`
+	HandlerIds []string      `json:"handler_ids"`
 }
 
 func (c *Check) Exec() *Result {
-	log.Debugf("(*Check).Exec => %s", log.PrintJson(c))
-
 	res := NewResult(time.Now())
-	if output, err := c.Action.Run(); err != nil {
+	data, err := exec.Command(c.Command).Output()
+	if err != nil {
 		res.Error = err
-	} else if output.Status == nil {
+	} else if err = json.NewDecoder(bytes.NewReader(data)).Decode(res.Output); err != nil {
+		res.Error = err
+	} else if res.Status == nil {
 		res.Error = fmt.Errorf("output status is nil")
-	} else {
-		switch *output.Status {
-		case StatusOK, StatusWarning, StatusCritical:
-			res.Status = *output.Status
-			res.Message = output.Message
-		default:
-			res.Error = fmt.Errorf("invalid output status: %d", output.Status)
-		}
 	}
 	res.EndTime = time.Now()
 
 	return res
-}
-
-func (c *Check) Interval() time.Duration {
-	return c.Action.Interval
-}
-
-func (c *Check) Handlers() []string {
-	return c.HandlerIds
 }

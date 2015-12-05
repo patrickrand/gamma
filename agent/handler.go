@@ -3,7 +3,9 @@ package agent
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 )
@@ -18,7 +20,7 @@ var (
 
 type Handler struct {
 	ID          string                 `json:"id"`
-	Type        HandlerType            `json:"handler_type"`
+	Type        HandlerType            `json:"type"`
 	Destination string                 `json:"destination"`
 	Parameters  map[string]interface{} `json:"parameters"`
 }
@@ -59,7 +61,7 @@ func HttpHandlerFunc(data interface{}, dest string, params map[string]interface{
 		return err
 	}
 
-	log.Infof("%s %s", resp.Status, string(body))
+	log.Printf("%s %s", resp.Status, string(body))
 	return nil
 }
 
@@ -68,6 +70,6 @@ func FileHandlerFunc(data interface{}, dest string, params map[string]interface{
 }
 
 var HandlerFuncIndex = map[HandlerType]HandlerFunc{
-	HttpHandler:   HttpHandlerFunc,
-	StdoutHandler: FileHandlerFunc,
+	HttpHandler: HttpHandlerFunc,
+	FileHandler: FileHandlerFunc,
 }
