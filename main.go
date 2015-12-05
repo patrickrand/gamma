@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"github.com/patrickrand/gamma/agent"
 	"log"
 )
@@ -26,32 +25,27 @@ func main() {
 	handle(exec())
 }
 
-func exec() <-chan agent.Result {
-	out := make(chan agent.Result)
+func exec() <-chan *agent.Result {
+	out := make(chan *agent.Result)
 	go func() {
-		for k, m := range Agent.Checks {
-			js, _ := json.Marshal(m)
-			log.Printf("main.exec => %s", string(js))
-			res := m.Exec()
-			res.CheckId = string(k)
-			if res.Error != nil {
-				res.Status = new(int)
-				*res.Status = agent.StatusErr
+		for _, check := range Agent.Checks {
+			result := check.Exec()
+			if result.Error != "" {
+				result.Status = new(int)
+				*result.Status = agent.StatusErr
 			}
-
-			out <- *res
+			out <- result
 		}
 		close(out)
 	}()
 	return out
 }
 
-func handle(in <-chan agent.Result) {
+func handle(in <-chan *agent.Result) {
 	for r := range in {
-		log.Printf("handle => %+v", r)
-		for _, h := range Agent.Handlers {
-			if err := h.Handle(r); err != nil {
-				log.Printf("handle => %v", err)
+		for _, hid := range r.Check.HandlerIDs {
+			if err := Agent.Handlers[hid].Handle(r); err != nil {
+				log.Printf("ERROR: handle => %#v", err)
 			}
 		}
 	}

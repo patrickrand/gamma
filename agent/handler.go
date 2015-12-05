@@ -25,7 +25,7 @@ type Handler struct {
 	Parameters  map[string]interface{} `json:"parameters"`
 }
 
-func (h *Handler) Handle(data interface{}) error {
+func (h Handler) Handle(data interface{}) error {
 	handlerFunc, ok := HandlerFuncIndex[h.Type]
 	if !ok {
 		return fmt.Errorf("invalid handler type %s: no matching handlerfunc", h.Type)

@@ -10,11 +10,12 @@ type Output struct {
 }
 
 type Result struct {
-	CheckId   string `json:"check_id"`
+	CheckID   string `json:"check_id"`
+	*Check    `json:"-"`
 	Output    `json:"output"`
 	StartTime time.Time `json:"start_time"`
 	EndTime   time.Time `json:"end_time"`
-	Error     error     `json:"error,omitempty"`
+	Error     string    `json:"error,omitempty"`
 }
 
 const (
@@ -24,6 +25,10 @@ const (
 	StatusCritical
 )
 
-func NewResult(startTime time.Time) *Result {
-	return &Result{StartTime: startTime}
+func NewResult(check *Check, startTime time.Time) *Result {
+	return &Result{
+		Check:     check,
+		CheckID:   check.ID,
+		StartTime: startTime,
+	}
 }
