@@ -13,13 +13,13 @@ import (
 type HandlerType string
 
 var (
-	HttpHandler HandlerType = "http"
-	FileHandler HandlerType = "file"
-	SmtpHandler HandlerType = "smtp"
+	HttpClient HandlerType = "http_client"
+	HttpServer HandlerType = "http_server"
+	FileWriter HandlerType = "file_writer"
+	SmtpClient HandlerType = "smtp_client"
 )
 
 type Handler struct {
-	ID          string                 `json:"id"`
 	Type        HandlerType            `json:"type"`
 	Destination string                 `json:"destination"`
 	Parameters  map[string]interface{} `json:"parameters"`
@@ -35,7 +35,11 @@ func (h Handler) Handle(data interface{}) error {
 
 type HandlerFunc func(data interface{}, dest string, params map[string]interface{}) error
 
-func HttpHandlerFunc(data interface{}, dest string, params map[string]interface{}) error {
+func HttpServerFunc(data interface{}, dest string, params map[string]interface{}) error {
+	return nil
+}
+
+func HttpClientFunc(data interface{}, dest string, params map[string]interface{}) error {
 	if dest == "" {
 		dest = "127.0.0.1"
 	}
@@ -65,11 +69,11 @@ func HttpHandlerFunc(data interface{}, dest string, params map[string]interface{
 	return nil
 }
 
-func FileHandlerFunc(data interface{}, dest string, params map[string]interface{}) error {
+func FileWriterFunc(data interface{}, dest string, params map[string]interface{}) error {
 	return json.NewEncoder(os.Stdout).Encode(data)
 }
 
 var HandlerFuncIndex = map[HandlerType]HandlerFunc{
-	HttpHandler: HttpHandlerFunc,
-	FileHandler: FileHandlerFunc,
+	HttpClient: HttpClientFunc,
+	FileWriter: FileWriterFunc,
 }

@@ -6,7 +6,6 @@ import (
 )
 
 const (
-	MAIN        = "MAIN"
 	CONFIG_FILE = "templates/agent.json"
 )
 
@@ -22,29 +21,31 @@ func main() {
 	if err != nil {
 		log.Panicf("Exiting Gamma... %v", err)
 	}
+
 	handle(exec())
 }
 
-func exec() <-chan *agent.Result {
-	out := make(chan *agent.Result)
+func exec() <-chan int {
+	out := make(chan int)
 	go func() {
-		for _, check := range Agent.Checks {
-			result := check.Exec()
+		for i := range Agent.Checks {
+			result := Agent.Checks[i].Exec()
 			if result.Error != "" {
 				result.Status = new(int)
 				*result.Status = agent.StatusErr
 			}
-			out <- result
+			Agent.Checks[i].Result = result
+			out <- i
 		}
 		close(out)
 	}()
 	return out
 }
 
-func handle(in <-chan *agent.Result) {
-	for r := range in {
-		for _, hid := range r.Check.HandlerIDs {
-			if err := Agent.Handlers[hid].Handle(r); err != nil {
+func handle(in <-chan int) {
+	for i := range in {
+		for _, hid := range Agent.Checks[i].HandlerIDs {
+			if err := Agent.Handlers[hid].Handle(Agent.Checks[i].Result); err != nil {
 				log.Printf("ERROR: handle => %#v", err)
 			}
 		}

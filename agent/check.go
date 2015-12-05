@@ -30,11 +30,13 @@ type Check struct {
 	// HandlerIDs is the list of IDs of the Handlers that this Check will use
 	// to push its results.
 	HandlerIDs []string `json:"handler_ids"`
+
+	*Result `json:"-"`
 }
 
 // Exec runs a Check's Command and returns its Result.
 func (c *Check) Exec() *Result {
-	result := NewResult(c, time.Now())
+	result := NewResult(c.ID, time.Now())
 	defer func() { result.EndTime = time.Now() }()
 
 	command := strings.Split(c.Command, " ")

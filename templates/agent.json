@@ -7,26 +7,24 @@
             "command": "/usr/bin/python ./bin/py-check.py",
             "interval": 60,
             "alert_on": "ok/warning/critical",
-            "handler_ids": ["file_handler_1"]
+            "handler_ids": ["file_writer_1"]
         },
         {
             "id": "mem_check",
             "command": "/usr/bin/bash ./bin/monitor-mem.sh -c 90 -w 80",
             "interval": 30,
             "alert_on": "ok/warning/critical",
-            "handler_ids": ["file_handler_1"]
+            "handler_ids": ["file_writer_1"]
         }
     ],     
     "handlers": { 
-        "http_handler_1": {
-            "id": "http_handler_1",
-            "type": "http",
+        "http_client_1": {
+            "type": "http_client",
             "destination": "localhost:8080",                
             "parameters": {}
         },
-        "file_handler_1": {
-            "id": "file_handler_1",
-            "type": "file",
+        "file_writer_1": {
+            "type": "file_writer",
             "destination": "stdout",
             "parameters": {}
         }
