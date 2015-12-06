@@ -25,7 +25,7 @@
         },
         "file_writer_1": {
             "type": "file_writer",
-            "destination": "stdout",
+            "destination": "/dev/stdout",
             "parameters": {}
         }
     }

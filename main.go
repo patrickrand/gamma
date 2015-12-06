@@ -13,6 +13,8 @@ var (
 	Agent *agent.Agent
 )
 
+// NOTE: This is a temporary main.go file, and is only being used
+// 		 for testing and development purposes.
 func main() {
 	log.Printf("Starting Gamma...")
 

@@ -27,7 +27,7 @@ type Agent struct {
 	Checks []Check `json:"checks"`
 
 	// Handlers is the map of configured Handlers available to the Agent
-	// for pushing a Check's results.
+	// for pushing Check results.
 	Handlers map[string]Handler `json:"handlers"`
 }
 

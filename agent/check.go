@@ -36,7 +36,7 @@ type Check struct {
 
 // Exec runs a Check's Command and returns its Result.
 func (c *Check) Exec() *Result {
-	result := NewResult(c.ID, time.Now())
+	result := NewResult(c.ID)
 	defer func() { result.EndTime = time.Now() }()
 
 	command := strings.Split(c.Command, " ")
