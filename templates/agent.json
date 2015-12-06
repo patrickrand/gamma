@@ -6,14 +6,14 @@
             "id": "py_check",
             "command": "/usr/bin/python ./bin/py-check.py",
             "interval": 60,
-            "alert_on": "ok/warning/critical",
+            "alert_on": "critical",
             "handler_ids": ["file_writer_1"]
         },
         {
             "id": "mem_check",
             "command": "/usr/bin/bash ./bin/monitor-mem.sh -c 90 -w 80",
             "interval": 30,
-            "alert_on": "ok/warning/critical",
+            "alert_on": "ok",
             "handler_ids": ["file_writer_1"]
         }
     ],     

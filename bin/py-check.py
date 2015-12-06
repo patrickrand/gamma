@@ -2,4 +2,4 @@
 
 import json
 
-print(json.dumps({"status": 1, "message": "This is a warning message!"}))
+print(json.dumps({"status": 2, "message": "This is a critical message!"}))

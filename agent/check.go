@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
 	"os/exec"
 	"strings"
 	"time"
@@ -27,10 +28,16 @@ type Check struct {
 	// this Check on its host.
 	Interval time.Duration `json:"interval"`
 
+	// AlertOn is the Output Status that indicates whether the result of this Check
+	// should be pushed to its Handlers.
+	AlertOn string `json:"alert_on"`
+
 	// HandlerIDs is the list of IDs of the Handlers that this Check will use
 	// to push its results.
 	HandlerIDs []string `json:"handler_ids"`
 
+	// Result is a pointer to the most recent Result value of this Check. It is used
+	// for updating the body response of the Agent's REST API server.
 	*Result `json:"-"`
 }
 
@@ -55,4 +62,34 @@ func (c *Check) Exec() *Result {
 	}
 
 	return result
+}
+
+// ShouldAlert determines whether a given Result Output Status should be
+// alerted on by its Handlers, according to the Check's AlertOn value.
+func (c *Check) ShouldAlert(status *int) bool {
+	if status == nil {
+		return false
+	}
+
+	if *status == StatusErr {
+		return true
+	}
+
+	switch c.AlertOn {
+	case "ok":
+		if *status >= StatusOK {
+			return true
+		}
+	case "warning":
+		if *status >= StatusWarning {
+			return true
+		}
+	case "critical":
+		if *status >= StatusCritical {
+			return true
+		}
+	default:
+		log.Printf("unrecognized \"alert_on\" value: %s", c.AlertOn)
+	}
+	return false
 }

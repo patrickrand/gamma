@@ -37,7 +37,9 @@ func exec() <-chan int {
 				*result.Status = agent.StatusErr
 			}
 			Agent.Checks[i].Result = result
-			out <- i
+			if Agent.Checks[i].ShouldAlert(result.Status) {
+				out <- i
+			}
 		}
 		close(out)
 	}()
