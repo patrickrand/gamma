@@ -41,6 +41,30 @@ type Check struct {
 	*Result `json:"-"`
 }
 
+func (c *Check) Run(checks chan<- string, abort <-chan struct{}) {
+	s := fmt.Sprintf("running %s\n", c.Command)
+	ticker := time.Tick(5 * time.Second)
+	for {
+		select {
+		case <-abort:
+			fmt.Println("closing check: %s", c.ID)
+			return
+		default:
+			<-ticker
+			fmt.Print(s)
+			result := c.Exec()
+			if result.Error != "" {
+				result.Status = new(int)
+				*result.Status = StatusErr
+			}
+			c.Result = result
+			checks <- c.ID
+			fmt.Printf("%+v\n", result)
+		}
+	}
+
+}
+
 // Exec runs a Check's Command and returns its Result.
 func (c *Check) Exec() *Result {
 	result := NewResult(c.ID)

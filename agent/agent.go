@@ -22,9 +22,13 @@ type Agent struct {
 	// FQDN, or CNAME.
 	HostID string `json:"host_id"`
 
-	// Checks represents the list of Checks to be executed by the Agent
+	// Server is the HTTP server that is (optionally) run on the Agent's host.
+	// It will serve the latest results of each Check.
+	Server `json:"server"`
+
+	// Checks represents the set of Checks to be executed by the Agent
 	// on its host.
-	Checks []Check `json:"checks"`
+	Checks map[string]Check `json:"checks"`
 
 	// Handlers is the map of configured Handlers available to the Agent
 	// for pushing Check results.

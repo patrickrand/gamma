@@ -1,16 +1,15 @@
 package main
 
 import (
+	//"fmt"
 	"github.com/patrickrand/gamma/agent"
 	"log"
-)
-
-const (
-	CONFIG_FILE = "templates/agent.json"
+	//"os"
 )
 
 var (
-	Agent *agent.Agent
+	ConfigFile = "templates/agent.json"
+	Agent      *agent.Agent
 )
 
 // NOTE: This is a temporary main.go file, and is only being used
@@ -19,14 +18,46 @@ func main() {
 	log.Printf("Starting Gamma...")
 
 	var err error
-	Agent, err = agent.LoadFromFile(CONFIG_FILE)
+	Agent, err = agent.LoadFromFile(ConfigFile)
 	if err != nil {
 		log.Panicf("Exiting Gamma... %v", err)
 	}
 
-	handle(exec())
+	if Agent.Server.IsActive {
+		go func() { log.Fatal(Agent.Serve()) }()
+	}
+
+	checks := make(chan string)
+	abort := make(chan struct{}, 2)
+	/*
+		go func() {
+			os.Stdin.Read(make([]byte, 1))
+			for id := range checks {
+				fmt.Printf("abort: %s\n", id)
+				abort <- struct{}{}
+			}
+		}()
+	*/
+	for id := range Agent.Checks {
+		check := Agent.Checks[id]
+		go check.Run(checks, abort)
+	}
+
+	for id := range checks {
+		check := Agent.Checks[id]
+		go func(string) {
+			for _, hid := range check.HandlerIDs {
+				if err := Agent.Handlers[hid].Handle(check.Result); err != nil {
+					log.Printf("ERROR: handle => %#v", err)
+
+				}
+			}
+		}(id)
+	}
+
 }
 
+/*
 func exec() <-chan int {
 	out := make(chan int)
 	go func() {
@@ -55,3 +86,4 @@ func handle(in <-chan int) {
 		}
 	}
 }
+*/

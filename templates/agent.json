@@ -1,22 +1,26 @@
 {
     "agent_id": "my_agent",
     "host_id": "localhost",
-    "checks": [
-        {   
-            "id": "py_check",
+    "server": {
+        "active": true,
+        "entrypoint": "/my_agent",
+        "bind_addr": "0.0.0.0",
+        "port": 7070
+    },
+    "checks": {   
+        "py_check": {
             "command": "/usr/bin/python ./bin/py-check.py",
-            "interval": 60,
+            "interval": 10,
             "alert_on": "critical",
             "handler_ids": ["file_writer_1"]
         },
-        {
-            "id": "mem_check",
+        "mem_check": {
             "command": "/usr/bin/bash ./bin/monitor-mem.sh -c 90 -w 80",
-            "interval": 30,
+            "interval": 10,
             "alert_on": "ok",
             "handler_ids": ["file_writer_1"]
         }
-    ],     
+    },     
     "handlers": { 
         "http_client_1": {
             "type": "http_client",
