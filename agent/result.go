@@ -9,16 +9,13 @@ import (
 // that will be pushed by the Agent.
 type Result struct {
 	// CheckID is the ID of the Check associated with this Result.
-	CheckID string `json:"check_id"`
+	CheckID string `json:"-"`
 
 	// Output is response data of the associated Check's execution.
 	Output `json:"output"`
 
-	// StartTime is the starting time of a Check's execution.
-	StartTime time.Time `json:"start_time"`
-
-	// EndTime is the ending time of a Check's execution.
-	EndTime time.Time `json:"end_time"`
+	// Metadata provides runtime metadata about the check.
+	Metadata `json:"metadata"`
 
 	// Error is string message of the potential error that may
 	// have occured during the running of a Check.
@@ -41,6 +38,17 @@ type Output struct {
 	// provide deeper insight into the exit status of the
 	// command.
 	Message string `json:"message,omitempty"`
+}
+
+type Metadata struct {
+	//Command is the command executed by the Check returning this Result.
+	Command string `json:"command"`
+
+	// StartTime is the starting time of a Check's execution.
+	StartTime time.Time `json:"start_time"`
+
+	// EndTime is the ending time of a Check's execution.
+	EndTime time.Time `json:"end_time"`
 }
 
 const (
@@ -69,8 +77,11 @@ const (
 // NewResult instantiates and returns a pointer to a new Result.
 // The StartTime of the Result is automatically set.
 func NewResult(checkID string) *Result {
-	return &Result{
-		CheckID:   checkID,
+	metadata := Metadata{
 		StartTime: time.Now(),
+	}
+	return &Result{
+		CheckID:  checkID,
+		Metadata: metadata,
 	}
 }

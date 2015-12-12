@@ -4,7 +4,9 @@ package agent
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"path/filepath"
 )
@@ -33,6 +35,8 @@ type Agent struct {
 	// Handlers is the map of configured Handlers available to the Agent
 	// for pushing Check results.
 	Handlers map[string]Handler `json:"handlers"`
+
+	Results map[string]*Result `json:"-"`
 }
 
 // LoadFromFile reads an agent.json file and decodes it into an Agent.
@@ -53,6 +57,35 @@ func LoadFromFile(file string) (*Agent, error) {
 		return nil, err
 	}
 
-	log.Printf("Loaded new Agent from file: %s", absPath)
+	log.Printf("loaded new agent (%s) from file: %s", a.AgentID, absPath)
 	return a, nil
+}
+
+func (a *Agent) Initialize() {
+	a.Results = make(map[string]*Result, len(a.Checks))
+	for id, c := range a.Checks {
+		c.ID = id
+		a.Checks[id] = c
+		a.Results[id] = NewResult(id)
+	}
+
+	if a.Server.IsActive {
+		go func() { log.Fatal(Serve(a)) }()
+	}
+	log.Printf("initialized agent (%s)", a.AgentID)
+}
+
+// Serve wraps an http.Server and serves the latest content of
+// the given Agent.
+func Serve(a *Agent) error {
+	http.HandleFunc(a.Server.Entrypoint, func(w http.ResponseWriter, r *http.Request) {
+		data, err := json.MarshalIndent(a.Results, "", "    ")
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		fmt.Fprintf(w, "%s", string(data))
+	})
+	return http.ListenAndServe(fmt.Sprintf("%s:%d", a.Server.BindAddr, a.Server.Port), nil)
 }

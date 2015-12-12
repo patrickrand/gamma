@@ -38,31 +38,19 @@ type Check struct {
 
 	// Result is a pointer to the most recent Result value of this Check. It is used
 	// for updating the body response of the Agent's REST API server.
-	*Result `json:"-"`
+	//	*Result `json:"-"`
 }
 
-func (c *Check) Run(checks chan<- string, abort <-chan struct{}) {
-	s := fmt.Sprintf("running %s\n", c.Command)
-	ticker := time.Tick(5 * time.Second)
-	for {
-		select {
-		case <-abort:
-			fmt.Println("closing check: %s", c.ID)
-			return
-		default:
-			<-ticker
-			fmt.Print(s)
-			result := c.Exec()
-			if result.Error != "" {
-				result.Status = new(int)
-				*result.Status = StatusErr
-			}
-			c.Result = result
-			checks <- c.ID
-			fmt.Printf("%+v\n", result)
+func (c *Check) Run(results chan<- *Result) {
+	for range time.Tick(c.Interval * time.Second) {
+		result := c.Exec()
+		if result.Error != "" {
+			result.Status = new(int)
+			*result.Status = StatusErr
 		}
+		results <- result
+		//fmt.Printf("%s -> %d : %s\n", c.ID, *result.Output.Status, result.Output.Message)
 	}
-
 }
 
 // Exec runs a Check's Command and returns its Result.
@@ -70,6 +58,7 @@ func (c *Check) Exec() *Result {
 	result := NewResult(c.ID)
 	defer func() { result.EndTime = time.Now() }()
 
+	result.Command = c.Command
 	command := strings.Split(c.Command, " ")
 	if len(command) < 1 {
 		result.Error = fmt.Sprintf("invalid command: %s", c.Command)

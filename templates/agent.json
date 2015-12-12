@@ -10,13 +10,13 @@
     "checks": {   
         "py_check": {
             "command": "/usr/bin/python ./bin/py-check.py",
-            "interval": 10,
+            "interval": 2,
             "alert_on": "critical",
             "handler_ids": ["file_writer_1"]
         },
         "mem_check": {
             "command": "/usr/bin/bash ./bin/monitor-mem.sh -c 90 -w 80",
-            "interval": 10,
+            "interval": 2,
             "alert_on": "ok",
             "handler_ids": ["file_writer_1"]
         }
