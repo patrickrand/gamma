@@ -35,10 +35,6 @@ type Check struct {
 	// HandlerIDs is the list of IDs of the Handlers that this Check will use
 	// to push its results.
 	HandlerIDs []string `json:"handler_ids"`
-
-	// Result is a pointer to the most recent Result value of this Check. It is used
-	// for updating the body response of the Agent's REST API server.
-	//	*Result `json:"-"`
 }
 
 func (c *Check) Run(results chan<- *Result) {
@@ -49,23 +45,21 @@ func (c *Check) Run(results chan<- *Result) {
 			*result.Status = StatusErr
 		}
 		results <- result
-		//fmt.Printf("%s -> %d : %s\n", c.ID, *result.Output.Status, result.Output.Message)
 	}
 }
 
 // Exec runs a Check's Command and returns its Result.
 func (c *Check) Exec() *Result {
-	result := NewResult(c.ID)
+	result := NewResult(c)
 	defer func() { result.EndTime = time.Now() }()
 
-	result.Command = c.Command
-	command := strings.Split(c.Command, " ")
-	if len(command) < 1 {
+	args := strings.Split(c.Command, " ")
+	if len(args) < 1 {
 		result.Error = fmt.Sprintf("invalid command: %s", c.Command)
 		return result
 	}
 
-	data, err := exec.Command(command[0], command[1:]...).Output()
+	data, err := exec.Command(args[0], args[1:]...).Output()
 	if err != nil {
 		result.Error = fmt.Sprintf("failed to execute check command: %v", err)
 	} else if err = json.NewDecoder(bytes.NewReader(data)).Decode(&(result.Output)); err != nil {

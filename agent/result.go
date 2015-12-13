@@ -76,12 +76,13 @@ const (
 
 // NewResult instantiates and returns a pointer to a new Result.
 // The StartTime of the Result is automatically set.
-func NewResult(checkID string) *Result {
+func NewResult(check *Check) *Result {
 	metadata := Metadata{
+		Command:   check.Command,
 		StartTime: time.Now(),
 	}
 	return &Result{
-		CheckID:  checkID,
+		CheckID:  check.ID,
 		Metadata: metadata,
 	}
 }

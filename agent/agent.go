@@ -66,7 +66,7 @@ func (a *Agent) Initialize() {
 	for id, c := range a.Checks {
 		c.ID = id
 		a.Checks[id] = c
-		a.Results[id] = NewResult(id)
+		a.Results[id] = NewResult(&c)
 	}
 
 	if a.Server.IsActive {
