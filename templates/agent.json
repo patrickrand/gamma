@@ -1,15 +1,15 @@
 {
-    "agent_id": "my_agent",
+    "agent_id": "templ",
     "host_id": "localhost",
     "server": {
         "active": true,
-        "entrypoint": "/my_agent",
+        "entrypoint": "/templ",
         "bind_addr": "0.0.0.0",
         "port": 7070
     },
     "checks": {   
-        "py_check": {
-            "command": "/usr/bin/python ./bin/py-check.py",
+        "bat_check": {
+            "command": "/usr/bin/bash ./bin/check-battery-charge.sh -c 25 -w 50",
             "interval": 2,
             "alert_on": "critical",
             "handler_ids": ["file_writer_1"]
