@@ -37,6 +37,9 @@ type Check struct {
 	HandlerIDs []string `json:"handler_ids"`
 }
 
+// Run executes the Check on its interval, infinitely.
+// It reports back each Result on a shared channel, where it will then
+// be handled.
 func (c *Check) Run(results chan<- *Result) {
 	for range time.Tick(c.Interval * time.Second) {
 		result := c.Exec()

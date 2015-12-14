@@ -40,6 +40,7 @@ type Output struct {
 	Message string `json:"message,omitempty"`
 }
 
+// Metadata stores runtime information for a given Check execution.
 type Metadata struct {
 	//Command is the command executed by the Check returning this Result.
 	Command string `json:"command"`
@@ -75,7 +76,8 @@ const (
 )
 
 // NewResult instantiates and returns a pointer to a new Result.
-// The StartTime of the Result is automatically set.
+// The StartTime of the Result is automatically set, as well as various
+// metadata about the Check that is being run.
 func NewResult(check *Check) *Result {
 	metadata := Metadata{
 		Command:   check.Command,

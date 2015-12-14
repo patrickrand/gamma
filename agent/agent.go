@@ -15,9 +15,9 @@ import (
 // particular host. An Agent is typically loaded from the agent.json
 // configuration file.
 type Agent struct {
-	// AgentID is used to uniquely identify an Agent across a network
+	// ID is used to uniquely identify an Agent across a network
 	// of separate hosts, each with their own Agent.
-	AgentID string `json:"agent_id"`
+	ID string `json:"agent_id"`
 
 	// HostID is used to uniquely identify the host this Agent is
 	// running on within a network. For example, this could be an IP address,
@@ -36,6 +36,8 @@ type Agent struct {
 	// for pushing Check results.
 	Handlers map[string]Handler `json:"handlers"`
 
+	// Results is the in-memory cache of the most recent results of each Check.
+	// The JSON representation of Results is the response body of requests to server.
 	Results map[string]*Result `json:"-"`
 }
 
@@ -57,10 +59,13 @@ func LoadFromFile(file string) (*Agent, error) {
 		return nil, err
 	}
 
-	log.Printf("loaded new agent (%s) from file: %s", a.AgentID, absPath)
+	log.Printf("loaded new agent (%s) from file: %s", a.ID, absPath)
 	return a, nil
 }
 
+// Initialize initializes certain dynamic aspects of the Agent.
+// In particular, the pre-loading of the Results cache with the IDs
+// of all the checks, and running the HTTP server if specified.
 func (a *Agent) Initialize() {
 	a.Results = make(map[string]*Result, len(a.Checks))
 	for id, c := range a.Checks {
@@ -70,14 +75,14 @@ func (a *Agent) Initialize() {
 	}
 
 	if a.Server.IsActive {
-		go func() { log.Fatal(Serve(a)) }()
+		go func() { log.Fatal(a.ServeHTTP()) }()
 	}
-	log.Printf("initialized agent (%s)", a.AgentID)
+	log.Printf("initialized agent (%s)", a.ID)
 }
 
-// Serve wraps an http.Server and serves the latest content of
+// ServeHTTP wraps an http.Server and serves the latest content of
 // the given Agent.
-func Serve(a *Agent) error {
+func (a *Agent) ServeHTTP() error {
 	http.HandleFunc(a.Server.Entrypoint, func(w http.ResponseWriter, r *http.Request) {
 		data, err := json.MarshalIndent(a.Results, "", "    ")
 		if err != nil {

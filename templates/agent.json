@@ -10,13 +10,25 @@
     "checks": {   
         "bat_check": {
             "command": "/usr/bin/bash ./bin/check-battery-charge.sh -c 25 -w 50",
-            "interval": 2,
+            "interval": 20,
             "alert_on": "critical",
             "handler_ids": ["file_writer_1"]
         },
         "mem_check": {
             "command": "/usr/bin/bash ./bin/check-memory-usage.sh -c 90 -w 80",
-            "interval": 2,
+            "interval": 30,
+            "alert_on": "ok",
+            "handler_ids": ["file_writer_1"]
+        },
+        "disk_check_root": {
+            "command": "/usr/bin/bash ./bin/check-disk-usage.sh / -c 75 -w 50",
+            "interval": 20,
+            "alert_on": "ok",
+            "handler_ids": ["file_writer_1"]
+        },
+        "disk_check_home": {
+            "command": "/usr/bin/bash ./bin/check-disk-usage.sh /home -c 75 -w 50",
+            "interval": 30,
             "alert_on": "ok",
             "handler_ids": ["file_writer_1"]
         }
