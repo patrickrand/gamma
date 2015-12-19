@@ -42,24 +42,26 @@ type Agent struct {
 }
 
 // LoadFromFile reads an agent.json file and decodes it into an Agent.
-func LoadFromFile(file string) (*Agent, error) {
-	absPath, err := filepath.Abs(file)
+func LoadFromFile(filename string) (*Agent, error) {
+	absPath, err := filepath.Abs(filename)
 	if err != nil {
 		return nil, err
 	}
 
 	f, err := os.Open(absPath)
-	defer f.Close()
 	if err != nil {
 		return nil, err
 	}
+	defer f.Close()
 
 	a := new(Agent)
 	if err = json.NewDecoder(f).Decode(a); err != nil {
 		return nil, err
 	}
 
-	log.Printf("loaded new agent (%s) from file: %s", a.ID, absPath)
+	data, err := json.MarshalIndent(*a, "", "    ")
+	fmt.Println(string(data))
+	log.Printf("loaded new agent \"%s\" from file: %s", a.ID, absPath)
 	return a, nil
 }
 
@@ -77,7 +79,7 @@ func (a *Agent) Initialize() {
 	if a.Server.IsActive {
 		go func() { log.Fatal(a.ServeHTTP()) }()
 	}
-	log.Printf("initialized agent (%s)", a.ID)
+	log.Printf("initialized agent \"%s\"", a.ID)
 }
 
 // ServeHTTP wraps an http.Server and serves the latest content of

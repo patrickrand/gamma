@@ -33,7 +33,6 @@ func main() {
 			for _, id := range check.HandlerIDs {
 				if err := Agent.Handlers[id].Handle(result); err != nil {
 					log.Printf("handler error: %v", err)
-
 				}
 			}
 		}(res)
