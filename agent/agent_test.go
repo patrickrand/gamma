@@ -1,16 +1,11 @@
 package agent
 
 import (
-	"bytes"
 	"encoding/json"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
-)
-
-const (
-	TEST_DIR = "/tmp/agent_test"
 )
 
 var testData = []byte(`
@@ -52,27 +47,27 @@ var testData = []byte(`
 }`)
 
 func TestLoadFromFile(t *testing.T) {
+	// create expected Agent struct from test data
+	var expected Agent
+	if err := json.Unmarshal(testData, &expected); err != nil {
+		t.Fatal(err.Error())
+	}
+
+	// setup test environment
 	filename := filepath.Join(os.TempDir(), "agent.json")
 	if err := ioutil.WriteFile(filename, testData, 0755); err != nil {
 		t.Fatal(err.Error())
 	}
+	defer os.Remove(filename)
 
-	gotAgent, err := LoadFromFile(filename)
+	// test
+	got, err := LoadFromFile(filename)
 	if err != nil {
 		t.Errorf("expected: %v, got: %q", nil, err.Error())
 	}
 
-	gotData, err := json.Marshal(gotAgent)
-	if err != nil {
-		t.Fatal(err.Error())
-	}
-
-	expectedData := new(bytes.Buffer)
-	if err := json.Compact(expectedData, testData); err != nil {
-		t.Fatal(err.Error())
-	}
-
-	if !bytes.Equal(expectedData.Bytes(), gotData) {
-		t.Errorf("expected: %s, got: %s", expectedData.String(), string(gotData))
+	// verify success
+	if *got != expected {
+		t.Errorf("expected: %#v\ngot: %#v", expected, *got)
 	}
 }

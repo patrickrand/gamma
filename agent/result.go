@@ -22,6 +22,10 @@ type Result struct {
 	Error string `json:"error,omitempty"`
 }
 
+// Results is the in-memory cache of the most recent results of each Check.
+// The JSON representation of Results is the response body of requests to server.
+var Results = make(map[string]*Result)
+
 // An Output wraps the returned result response of
 // the command executed by a Check. It acts as the API
 // between Gamma and the user-defined Check commands.

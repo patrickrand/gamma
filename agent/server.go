@@ -17,3 +17,7 @@ type Server struct {
 	// Port is the local port that this Server is listening on.
 	Port int `json:"port"`
 }
+
+// HttpServer is the HTTP server that is (optionally) run on the Agent's host.
+// It will serve the latest results of each Check.
+var HttpServer = new(Server)

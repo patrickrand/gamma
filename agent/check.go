@@ -37,6 +37,10 @@ type Check struct {
 	HandlerIDs []string `json:"handler_ids"`
 }
 
+// Checks represents the set of Checks to be executed by the Agent
+// on its host.
+var Checks = make(map[string]Check)
+
 // Run executes the Check on its interval, infinitely.
 // It reports back each Result on a shared channel, where it will then
 // be handled.

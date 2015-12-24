@@ -13,25 +13,24 @@ var (
 func main() {
 	var err error
 	log.Printf("Starting Gamma...")
-	Agent, err = agent.LoadFromFile(ConfigFile)
+	err = agent.LoadFromFile(ConfigFile)
 	if err != nil {
 		log.Panicf("Exiting Gamma... %v", err)
 	}
-	Agent.Initialize()
 
-	results := make(chan *agent.Result, len(Agent.Checks))
-	for id := range Agent.Checks {
+	results := make(chan *agent.Result)
+	for id := range agent.Checks {
 		go func(check agent.Check) {
 			check.Run(results)
-		}(Agent.Checks[id])
+		}(agent.Checks[id])
 	}
 
 	for res := range results {
-		Agent.Results[res.CheckID] = res
+		agent.Results[res.CheckID] = res
 		go func(result *agent.Result) {
-			check := Agent.Checks[result.CheckID]
+			check := agent.Checks[result.CheckID]
 			for _, id := range check.HandlerIDs {
-				if err := Agent.Handlers[id].Handle(result); err != nil {
+				if err := agent.Handlers[id].Handle(result); err != nil {
 					log.Printf("handler error: %v", err)
 				}
 			}
