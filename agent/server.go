@@ -1,5 +1,11 @@
 package agent
 
+import (
+	"encoding/json"
+	"fmt"
+	"net/http"
+)
+
 // A Server is the local HTTP server running on the Agent's host.
 // It serves the latest, real-time results of the Agent's checks,
 // regardless of their Status/AlertOn values.
@@ -16,8 +22,23 @@ type Server struct {
 
 	// Port is the local port that this Server is listening on.
 	Port int `json:"port"`
+
+	Cache map[string]Result `json:"-"`
 }
 
-// HttpServer is the HTTP server that is (optionally) run on the Agent's host.
-// It will serve the latest results of each Check.
-var HttpServer = new(Server)
+// ServeHTTP wraps an http.HttpServer and serves the latest content of
+// the given Agent.
+func (server *Server) ServeHTTP() error {
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		data, err := json.MarshalIndent(server.Cache, "", "    ")
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		fmt.Fprintf(w, "%s", string(data))
+	})
+
+	entrypoint := fmt.Sprintf("%s:%d", server.BindAddr, server.Port)
+	fmt.Printf("serving results API at %s\n", entrypoint)
+	return http.ListenAndServe(entrypoint, nil)
+}

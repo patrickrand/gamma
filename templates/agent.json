@@ -1,7 +1,9 @@
 {
-    "agent_id": "templ",
     "host":{
-        "id": "localhost"
+        "id": "my-host",
+        "fqdn": "localhost.localdomain",
+        "ip": "127.0.0.1",
+        "ssl": false
     },
     "server": {
         "active": true,

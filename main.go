@@ -6,34 +6,41 @@ import (
 )
 
 var (
-	ConfigFile = "templates/agent.json"
-	Agent      *agent.Agent
+	config = "templates/agent.json"
+
+	host   = new(agent.Host)
+	server = new(agent.Server)
+
+	checks   = make(map[string]agent.Check)
+	handlers = make(map[string]agent.Handler)
 )
 
 func main() {
-	var err error
 	log.Printf("Starting Gamma...")
-	err = agent.LoadFromFile(ConfigFile)
-	if err != nil {
-		log.Panicf("Exiting Gamma... %v", err)
+	if err := agent.LoadFromFile(config, host, checks, handlers, server); err != nil {
+		log.Fatalf("failed to load agent from file %s: %v", err)
+	}
+
+	if server.IsActive {
+		go func() { log.Fatal(server.ServeHTTP()) }()
 	}
 
 	results := make(chan *agent.Result)
-	for id := range agent.Checks {
+	for _, c := range checks {
 		go func(check agent.Check) {
 			check.Run(results)
-		}(agent.Checks[id])
+		}(c)
 	}
 
-	for res := range results {
-		agent.Results[res.CheckID] = res
-		go func(result *agent.Result) {
-			check := agent.Checks[result.CheckID]
+	for r := range results {
+		go func(r *agent.Result) {
+			server.Cache[r.CheckID] = *r
+			check := checks[r.CheckID]
 			for _, id := range check.HandlerIDs {
-				if err := agent.Handlers[id].Handle(result); err != nil {
+				if err := handlers[id].Handle(r); err != nil {
 					log.Printf("handler error: %v", err)
 				}
 			}
-		}(res)
+		}(r)
 	}
 }
