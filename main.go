@@ -2,7 +2,9 @@ package main
 
 import (
 	"github.com/patrickrand/gamma/agent"
+	"io/ioutil"
 	"log"
+	"time"
 )
 
 var (
@@ -15,11 +17,22 @@ var (
 	handlers = make(map[string]agent.Handler)
 )
 
-func main() {
-	log.Printf("Starting Gamma...")
-	if err := agent.LoadFromFile(config, host, checks, handlers, server); err != nil {
-		log.Fatalf("failed to load agent from file %s: %v", err)
+func init() {
+	log.Print("initializing gamma")
+
+	data, err := ioutil.ReadFile(config)
+	if err != nil {
+		log.Fatalf("failed to read config file: %v")
 	}
+
+	if err := agent.Load(data, host, checks, handlers, server); err != nil {
+		log.Fatalf("failed to load agent modules: %v", err)
+	}
+
+}
+
+func main() {
+	log.Print("running gamma")
 
 	if server.IsActive {
 		go func() { log.Fatal(server.ServeHTTP()) }()
@@ -28,15 +41,16 @@ func main() {
 	results := make(chan *agent.Result)
 	for _, c := range checks {
 		go func(check agent.Check) {
-			check.Run(results)
+			for range time.Tick(check.Interval * time.Second) {
+				results <- check.Exec()
+			}
 		}(c)
 	}
 
 	for r := range results {
 		go func(r *agent.Result) {
-			server.Cache[r.CheckID] = *r
-			check := checks[r.CheckID]
-			for _, id := range check.HandlerIDs {
+			server.Cache[r.ID] = *r
+			for _, id := range r.HandlerIDs {
 				if err := handlers[id].Handle(r); err != nil {
 					log.Printf("handler error: %v", err)
 				}

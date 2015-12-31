@@ -6,5 +6,3 @@ type Host struct {
 	IP   string `json:"ip"`
 	SSL  bool   `json:"ssl"`
 }
-
-var host = new(Host)

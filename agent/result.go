@@ -8,8 +8,8 @@ import (
 // result response of a Check's execution. It is the data
 // that will be pushed by the Agent.
 type Result struct {
-	// CheckID is the ID of the Check associated with this Result.
-	CheckID string `json:"-"`
+	// Check is the Check associated with this Result.
+	*Check `json:"-"`
 
 	// Output is response data of the associated Check's execution.
 	Output `json:"output"`
@@ -34,7 +34,7 @@ type Output struct {
 	// StatusErr, StatusOK, StatusWarning, and StatusCritical
 	// constant below. Status is a pointer type as a result
 	// of its natural "zero-value" already being reserved by StatusOK.
-	Status *int `json:"status"`
+	Status *int `json:"status,omitempty"`
 
 	// Message is the (optional) message response of the
 	// command being executed in the Check. It is used to
@@ -45,6 +45,9 @@ type Output struct {
 
 // Metadata stores runtime information for a given Check execution.
 type Metadata struct {
+	//CheckID is the ID of the Check that produced this Result.
+	CheckID string `json:"check_id"`
+
 	//Command is the command executed by the Check returning this Result.
 	Command string `json:"command"`
 
@@ -83,11 +86,12 @@ const (
 // metadata about the Check that is being run.
 func NewResult(check *Check) *Result {
 	metadata := Metadata{
+		CheckID:   check.ID,
 		Command:   check.Command,
 		StartTime: time.Now(),
 	}
 	return &Result{
-		CheckID:  check.ID,
+		Check:    check,
 		Metadata: metadata,
 	}
 }

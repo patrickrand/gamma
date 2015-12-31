@@ -61,7 +61,7 @@ func TestLoadFromFile(t *testing.T) {
 	defer os.Remove(filename)
 
 	// test
-	got, err := LoadFromFile(filename)
+	got, err := Load(filename)
 	if err != nil {
 		t.Errorf("expected: %v, got: %q", nil, err.Error())
 	}

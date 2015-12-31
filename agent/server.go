@@ -3,6 +3,7 @@ package agent
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 )
 
@@ -39,6 +40,6 @@ func (server *Server) ServeHTTP() error {
 	})
 
 	entrypoint := fmt.Sprintf("%s:%d", server.BindAddr, server.Port)
-	fmt.Printf("serving results API at %s\n", entrypoint)
+	log.Printf("serving results API at %s\n", entrypoint)
 	return http.ListenAndServe(entrypoint, nil)
 }

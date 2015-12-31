@@ -12,6 +12,12 @@
         "port": 7070
     },
     "checks": {   
+        "invalid_check": {
+            "command": "/usr/bin/my-fake-check",
+            "interval": 5,
+            "alert_on": "critical",
+            "handler_ids": ["my_file_writer-1"]
+        },
         "bat_check": {
             "command": "/usr/bin/bash ./bin/check-battery-charge.sh -c 25 -w 50",
             "interval": 20,

@@ -7,15 +7,10 @@ package agent
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 )
 
-// LoadFromFile reads an agent.json file and decodes it into various gamma modules.
-func LoadFromFile(filename string, host *Host, checks map[string]Check, handlers map[string]Handler, server *Server) error {
-	data, err := ioutil.ReadFile(filename)
-	if err != nil {
-		return fmt.Errorf("failed to read file: %v", err)
-	}
+// Load decodes the given data into various gamma modules.
+func Load(data []byte, host *Host, checks map[string]Check, handlers map[string]Handler, server *Server) error {
 
 	var modules = struct {
 		*Host    `json:"host"`
@@ -39,6 +34,5 @@ func LoadFromFile(filename string, host *Host, checks map[string]Check, handlers
 	}
 
 	server.Cache = make(map[string]Result, len(checks))
-
 	return nil
 }

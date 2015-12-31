@@ -30,10 +30,6 @@ type Handler struct {
 	Parameters map[string]interface{} `json:"parameters"`
 }
 
-// Handlers is the map of configured Handlers available to the Agent
-// for pushing Check results.
-var handlers = make(map[string]Handler)
-
 // Handle is a factory-style method that handles an Agent's Check results according
 // to its HandlerType.
 func (h Handler) Handle(data interface{}) error {

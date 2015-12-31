@@ -37,24 +37,16 @@ type Check struct {
 	HandlerIDs []string `json:"handler_ids"`
 }
 
-// Run executes the Check on its interval, infinitely.
-// It reports back each Result on a shared channel, where it will then
-// be handled.
-func (c *Check) Run(results chan<- *Result) {
-	for range time.Tick(c.Interval * time.Second) {
-		result := c.Exec()
+// Exec runs a Check's Command and returns its Result.
+func (c *Check) Exec() *Result {
+	result := NewResult(c)
+	defer func() {
+		result.EndTime = time.Now()
 		if result.Error != "" {
 			result.Status = new(int)
 			*result.Status = StatusErr
 		}
-		results <- result
-	}
-}
-
-// Exec runs a Check's Command and returns its Result.
-func (c *Check) Exec() *Result {
-	result := NewResult(c)
-	defer func() { result.EndTime = time.Now() }()
+	}()
 
 	args := strings.Split(c.Command, " ")
 	if len(args) < 1 {
@@ -87,19 +79,13 @@ func (c *Check) ShouldAlert(status *int) bool {
 
 	switch c.AlertOn {
 	case "ok":
-		if *status >= StatusOK {
-			return true
-		}
+		return *status >= StatusOK
 	case "warning":
-		if *status >= StatusWarning {
-			return true
-		}
+		return *status >= StatusWarning
 	case "critical":
-		if *status >= StatusCritical {
-			return true
-		}
-	default:
-		log.Printf("unrecognized \"alert_on\" value: %s", c.AlertOn)
+		return *status >= StatusCritical
 	}
+
+	log.Printf("unrecognized \"alert_on\" value: %s", c.AlertOn)
 	return false
 }
