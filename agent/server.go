@@ -11,6 +11,11 @@ import (
 // It serves the latest, real-time results of the Agent's checks,
 // regardless of their Status/AlertOn values.
 type Server struct {
+	ID   string `json:"id"`
+	FQDN string `json:"fqdn"`
+	IP   string `json:"ip"`
+	SSL  bool   `json:"ssl"`
+
 	// IsActive indicates whether or not this Server should be run.
 	IsActive bool `json:"active"`
 

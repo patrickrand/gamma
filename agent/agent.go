@@ -7,25 +7,25 @@ package agent
 import (
 	"encoding/json"
 	"fmt"
+	"io"
+	"os"
+    "sync"
 )
 
-// Load decodes the given data into various gamma modules.
-func Load(data []byte, host *Host, checks map[string]Check, handlers map[string]Handler, server *Server) error {
+var mu *sync.Mutex
 
+// Load decodes the given data into various gamma modules.
+func Load(r io.Reader, checks map[string]Check, server *Server) error {
 	var modules = struct {
-		*Host    `json:"host"`
-		Checks   map[string]Check   `json:"checks"`
-		Handlers map[string]Handler `json:"handlers"`
-		*Server  `json:"server"`
+		Checks  map[string]Check `json:"checks"`
+		*Server `json:"server"`
 	}{
-		Host:     host,
-		Checks:   checks,
-		Handlers: handlers,
-		Server:   server,
+		Checks: checks,
+		Server: server,
 	}
 
-	if err := json.Unmarshal(data, &modules); err != nil {
-		return fmt.Errorf("failed to load modules: %v", err)
+	if err := json.NewDecoder(r).Decode(&modules); err != nil {
+		return fmt.Errorf("agent.Load failed decoding modules: %v", err)
 	}
 
 	for id, c := range checks {
@@ -34,5 +34,15 @@ func Load(data []byte, host *Host, checks map[string]Check, handlers map[string]
 	}
 
 	server.Cache = make(map[string]Result, len(checks))
+	return nil
+}
+
+func Write(r *Result) error {
+    mu.Lock()
+    defer mu.Unlock()
+
+	if err := json.NewEncoder(os.Stdout).Encode(r); err != nil {
+		return fmt.Errorf("agent.Write failed to encode result to stdout: %v", err)
+	}
 	return nil
 }
