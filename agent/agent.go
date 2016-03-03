@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"io"
 	"os"
-    "sync"
+	"sync"
 )
 
 var mu *sync.Mutex
@@ -38,8 +38,8 @@ func Load(r io.Reader, checks map[string]Check, server *Server) error {
 }
 
 func Write(r *Result) error {
-    mu.Lock()
-    defer mu.Unlock()
+	mu.Lock()
+	defer mu.Unlock()
 
 	if err := json.NewEncoder(os.Stdout).Encode(r); err != nil {
 		return fmt.Errorf("agent.Write failed to encode result to stdout: %v", err)
