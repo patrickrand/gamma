@@ -59,7 +59,7 @@ type Metadata struct {
 }
 
 const (
-	// StatusErr is used when an error occured runnning the Check.
+	// StatusErr is used when an error occurred running the Check.
 	// This value can be specified by the used-defined command,
 	// but is generally set by the Agent when a command fails or
 	// has an invalid response format.

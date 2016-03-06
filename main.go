@@ -42,7 +42,7 @@ func main() {
 
 	for r := range results {
 		go func(r *agent.Result) {
-			server.Cache[r.ID] = *r
+			server.Cache.Save(*r)
 			if err := agent.Write(r); err != nil {
 				log.Printf("[error] failed to write result: %v", err)
 			}

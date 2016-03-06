@@ -9,10 +9,7 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"sync"
 )
-
-var mu *sync.Mutex
 
 // Load decodes the given data into various gamma modules.
 func Load(r io.Reader, checks map[string]Check, server *Server) error {
@@ -33,14 +30,11 @@ func Load(r io.Reader, checks map[string]Check, server *Server) error {
 		checks[id] = c
 	}
 
-	server.Cache = make(map[string]Result, len(checks))
+	server.Cache = NewCache()
 	return nil
 }
 
 func Write(r *Result) error {
-	mu.Lock()
-	defer mu.Unlock()
-
 	if err := json.NewEncoder(os.Stdout).Encode(r); err != nil {
 		return fmt.Errorf("agent.Write failed to encode result to stdout: %v", err)
 	}

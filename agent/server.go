@@ -1,7 +1,6 @@
 package agent
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -29,22 +28,20 @@ type Server struct {
 	// Port is the local port that this Server is listening on.
 	Port int `json:"port"`
 
-	Cache map[string]Result `json:"-"`
+	*Cache `json:"-"`
 }
 
 // ServeHTTP wraps an http.HttpServer and serves the latest content of
 // the given Agent.
 func (server *Server) ServeHTTP() error {
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		data, err := json.MarshalIndent(server.Cache, "", "    ")
-		if err != nil {
+	http.HandleFunc(server.Entrypoint, func(w http.ResponseWriter, r *http.Request) {
+		if err := server.Cache.Load(w, jsonFormatterFunc); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		fmt.Fprintf(w, "%s", string(data))
 	})
 
-	entrypoint := fmt.Sprintf("%s:%d", server.BindAddr, server.Port)
-	log.Printf("serving results API at %s\n", entrypoint)
-	return http.ListenAndServe(entrypoint, nil)
+	addr := fmt.Sprintf("%s:%d", server.BindAddr, server.Port)
+	log.Printf("serving gamma at %s\n", addr)
+	return http.ListenAndServe(addr, nil)
 }
