@@ -1,7 +1,6 @@
 package agent
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"sync"
@@ -17,38 +16,6 @@ func NewCache() *Cache {
 	return &Cache{RWMutex: new(sync.RWMutex), results: make(map[string]Result)}
 }
 
-type FormatterFunc func(w io.Writer, v interface{}) error
-
-var defaultFormatterFunc = func(w io.Writer, v interface{}) error {
-	if err := json.NewEncoder(w).Encode(v); err != nil {
-		return fmt.Errorf("agent.defaultFormatterFunc failed to encode value: %v", err)
-	}
-	return nil
-}
-
-var jsonFormatterFunc = func(w io.Writer, v interface{}) error {
-	data, err := json.Marshal(v)
-	if err != nil {
-		return fmt.Errorf("agent.jsonFormatterFunc failed to marshal value: %v", err)
-	}
-	if _, err := fmt.Fprint(w, string(data)); err != nil {
-		return fmt.Errorf("agent.jsonFormatterFunc failed to write data: %v", err)
-	}
-
-	return nil
-}
-
-var prettyJSONFormatterFunc = func(w io.Writer, v interface{}) error {
-	data, err := json.MarshalIndent(v, "", "    ")
-	if err != nil {
-		return fmt.Errorf("agent.prettyJSONFormatterFunc failed to marshal (w/ indent) value: %v", err)
-	}
-	if _, err := fmt.Fprint(w, string(data)); err != nil {
-		return fmt.Errorf("agent.prettyJSONFormatterFunc failed to write data: %v", err)
-	}
-	return nil
-}
-
 // Load writes a cache's results map to the given writer.
 func (cache Cache) Load(w io.Writer, fmtFunc FormatterFunc) error {
 	cache.RLock()
@@ -62,6 +29,14 @@ func (cache Cache) Load(w io.Writer, fmtFunc FormatterFunc) error {
 		return fmt.Errorf("agent.Cache.Load failed to load results map: %v", err)
 	}
 	return nil
+}
+
+// Lookup returns the result associated when the the give result ID, if one exists.
+func (cache Cache) Lookup(id string) (Result, bool) {
+	cache.RLock()
+	defer cache.RUnlock()
+	result, ok := cache.results[id]
+	return result, ok
 }
 
 // Save sets the cache's map with the given ID and result pair.

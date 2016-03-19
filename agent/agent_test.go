@@ -45,29 +45,3 @@ var testData = []byte(`
         }
     }
 }`)
-
-func TestLoadFromFile(t *testing.T) {
-	// create expected Agent struct from test data
-	var expected Agent
-	if err := json.Unmarshal(testData, &expected); err != nil {
-		t.Fatal(err.Error())
-	}
-
-	// setup test environment
-	filename := filepath.Join(os.TempDir(), "agent.json")
-	if err := ioutil.WriteFile(filename, testData, 0755); err != nil {
-		t.Fatal(err.Error())
-	}
-	defer os.Remove(filename)
-
-	// test
-	got, err := Load(filename)
-	if err != nil {
-		t.Errorf("expected: %v, got: %q", nil, err.Error())
-	}
-
-	// verify success
-	if *got != expected {
-		t.Errorf("expected: %#v\ngot: %#v", expected, *got)
-	}
-}
