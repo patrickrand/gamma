@@ -16,7 +16,7 @@ do
             shift
             ;;
         *)
-            echo "{\"status\": -1, \"message\": \"unrecognized argument ${arg}\"}"
+            echo "{\"code\": -1, \"message\": \"unrecognized argument ${arg}\"}"
             exit -1
             ;;
     esac
@@ -29,12 +29,12 @@ function is_gte {
 }
 
 if [[ $(is_gte "$USAGE" "$CRITICAL_OVER") = 1 ]]; then
-    STATUS=2
+    CODE=2
 elif [[ $(is_gte "$USAGE" "$WARNING_OVER") = 1 ]]; then
-    STATUS=1
+    CODE=1
 else
-    STATUS=0
+    CODE=0
 fi
 
 MESSAGE="${USAGE}% of memory currently in use"
-echo "{\"status\": $STATUS, \"message\": \"${MESSAGE}\"}"
+echo "{\"code\": $CODE, \"message\": \"${MESSAGE}\"}"

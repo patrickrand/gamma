@@ -26,24 +26,18 @@ type Result struct {
 	// EndTime is the ending time of a Check's execution.
 	EndTime time.Time `json:"end_time"`
 
-	// StatusInt is the integer exit code of the command.
+	// Code is the returned integer code of the command.
 	// The accepted values of Status are detailed by the
 	// StatusError, StatusOK, StatusWarn, and StatusCritical
 	// constant below. Status is a pointer type as a result
 	// of its natural "zero-value" already being reserved by StatusOK.
-	StatusCode int `json:"status_code"`
+	Code int `json:"code"`
 
 	// Message is the (optional) message response of the
 	// command being executed in the Check. It is used to
 	// provide deeper insight into the exit status of the
 	// command.
 	Message string `json:"message,omitempty"`
-
-	// Error is string message of the potential error that may
-	// have occured during the running of a Check.
-	error `json:"error,omitempty"`
-
-	URI string `json:"uri"`
 }
 
 const (

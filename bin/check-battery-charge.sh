@@ -15,7 +15,7 @@ while [[ $# > 0 ]]; do
             shift
             ;;
          *)
-            echo "{\"status\": -1, \"message\": \"unrecognized argument ${arg}\"}"
+            echo "{\"code\": -1, \"message\": \"unrecognized argument ${arg}\"}"
             exit -1
             ;;
     esac
@@ -35,13 +35,13 @@ do
 done
 
 if [[ $TOT_POW -le $CRITICAL_UNDER ]]; then
-    STATUS=2
+    CODE=2
 elif [[ $TOT_POW -le $WARNING_UNDER ]]; then
-    STATUS=1
+    CODE=1
 else
-    STATUS=0
+    CODE=0
 fi
 
 MESSAGE="total battery power is ${TOT_POW}% charged"
-echo "{\"status\": ${STATUS}, \"message\": \"${MESSAGE}\"}"
+echo "{\"code\": ${CODE}, \"message\": \"${MESSAGE}\"}"
 

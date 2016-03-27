@@ -1,8 +1,6 @@
 package agent
 
 import (
-	"encoding/json"
-	"os/exec"
 	"time"
 )
 
@@ -27,41 +25,17 @@ type Check struct {
 	Interval time.Duration `json:"interval"`
 }
 
-type Executer interface {
-	Execute(cmd string, args ...string) (code int, message string)
-}
-
-type ShellExecuter struct{}
-
-func (sh ShellExecuter) Execute(cmd string, args ...string) (code int, message string) {
-	data, err := exec.Command(cmd, args...).Output()
-	if err != nil {
-		return StatusError, "ShellExecuter failed to execute command: " + err.Error()
-	}
-
-	output := struct {
-		Code    int    `json:"code"`
-		Message string `json:"message,omitempty"`
-	}{}
-
-	if err := json.Unmarshal(data, &output); err != nil {
-		return StatusError, "ShellExecuter failed to unmarshal command output: " + err.Error()
-	}
-
-	return output.Code, output.Message
-}
-
 func (check Check) Run(executer Executer) Result {
 	start := time.Now()
 	code, message := executer.Execute(check.Command, check.Args...)
 	return Result{
-		ID:         check.ID,
-		Command:    check.Command,
-		Args:       check.Args,
-		Interval:   check.Interval,
-		StartTime:  start,
-		EndTime:    time.Now(),
-		StatusCode: code,
-		Message:    message,
+		ID:        check.ID,
+		Command:   check.Command,
+		Args:      check.Args,
+		Interval:  check.Interval,
+		StartTime: start,
+		EndTime:   time.Now(),
+		Code:      code,
+		Message:   message,
 	}
 }

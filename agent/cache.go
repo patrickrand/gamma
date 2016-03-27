@@ -31,7 +31,7 @@ func (cache Cache) Load(w io.Writer, fmtFunc FormatterFunc) error {
 	return nil
 }
 
-// Lookup returns the result associated when the the give result ID, if one exists.
+// Lookup returns the result associated with the given result ID, if one exists.
 func (cache Cache) Lookup(id string) (Result, bool) {
 	cache.RLock()
 	defer cache.RUnlock()

@@ -103,7 +103,7 @@ func (server *Server) statusHandler(w http.ResponseWriter, r *http.Request) {
 	requestedResults := make(map[string]Result, 0)
 	// NOTE: also implement for CLI
 	for id, result := range results {
-		if strconv.Itoa(result.StatusCode) == status {
+		if strconv.Itoa(result.Code) == status {
 			requestedResults[id] = result
 		}
 	}
