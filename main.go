@@ -39,7 +39,7 @@ func main() {
 		modules.Checks[id] = check
 		go func(check agent.Check) {
 			for range time.Tick(check.Interval * time.Second) {
-				result := check.Run(agent.NewShellExecuter(-1))
+				result := agent.ExecuteCheck(agent.NewShellExecuter(-1), check)
 				cache <- result
 				stdout <- result
 			}

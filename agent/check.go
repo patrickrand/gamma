@@ -24,18 +24,3 @@ type Check struct {
 	// this Check on its host.
 	Interval time.Duration `json:"interval"`
 }
-
-func (check Check) Run(executer Executer) Result {
-	start := time.Now()
-	code, message := executer.Execute(check.Command, check.Args...)
-	return Result{
-		ID:        check.ID,
-		Command:   check.Command,
-		Args:      check.Args,
-		Interval:  check.Interval,
-		StartTime: start,
-		EndTime:   time.Now(),
-		Code:      code,
-		Message:   message,
-	}
-}

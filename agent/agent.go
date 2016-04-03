@@ -4,7 +4,23 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"time"
 )
+
+func ExecuteCheck(executer Executer, check Check) Result {
+	start := time.Now()
+	code, message := executer.Execute(check.Command, check.Args...)
+	return Result{
+		ID:        check.ID,
+		Command:   check.Command,
+		Args:      check.Args,
+		Interval:  check.Interval,
+		StartTime: start,
+		EndTime:   time.Now(),
+		Code:      code,
+		Message:   message,
+	}
+}
 
 // Decode decodes a reader into an interface, returning an error if the operation fails.
 func Decode(r io.Reader, modules interface{}) error {
