@@ -1,39 +1,42 @@
-package agent
+package main
 
 import (
 	"encoding/json"
-	"fmt"
-	"io"
+	"log"
+	"os"
 	"time"
+
+	"github.com/patrickrand/gamma"
 )
 
-func ExecuteCheck(executer Executer, check Check) Result {
-	start := time.Now()
-	code, message := executer.Execute(check.Command, check.Args...)
-	return Result{
-		ID:        check.ID,
-		Command:   check.Command,
-		Args:      check.Args,
-		Interval:  check.Interval,
-		StartTime: start,
-		EndTime:   time.Now(),
-		Code:      code,
-		Message:   message,
+func runChecks(cache, stdout chan gamma.Result) {
+	for id, check := range modules.Checks {
+		check.ID = id
+		modules.Checks[id] = check
+		go func(check gamma.Check) {
+			for range time.Tick(check.Interval * time.Second) {
+				result := check.Run(gamma.NewShellExecuter(-1))
+				cache <- result
+				stdout <- result
+			}
+		}(check)
 	}
 }
 
-// Decode decodes a reader into an interface, returning an error if the operation fails.
-func Decode(r io.Reader, modules interface{}) error {
-	if err := json.NewDecoder(r).Decode(modules); err != nil {
-		return fmt.Errorf("agent.Decode failed decoding modules: %v", err)
-	}
-	return nil
+func writeResults(stdout chan gamma.Result) {
+	go func(stdout chan gamma.Result) {
+		for result := range stdout {
+			if err := json.NewEncoder(os.Stdout).Encode(result); err != nil {
+				log.Printf("[error] [main] failed to write result: %v", err)
+			}
+		}
+	}(stdout)
 }
 
-// Encode encodes a writer into an interface, returning an error if the operation fails.
-func Encode(w io.Writer, results interface{}) error {
-	if err := json.NewEncoder(w).Encode(results); err != nil {
-		return fmt.Errorf("agent.Encode failed to encode result: %v", err)
-	}
-	return nil
+func cacheResults(cache *Cache, results chan gamma.Result) {
+	go func(cache *Cache, results chan gamma.Result) {
+		for result := range results {
+			cache.Save(result)
+		}
+	}(cache, results)
 }

@@ -1,12 +1,15 @@
-package agent
+package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"log"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/patrickrand/gamma"
 )
 
 // A Server is the local HTTP server running on the agent's host.
@@ -55,7 +58,7 @@ func (server *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func (server *Server) resultsHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
-		if err := server.Cache.Load(w, jsonFormatterFunc); err != nil {
+		if err := server.Cache.Load(w, gamma.JSONFormatterFunc); err != nil {
 			httpLogAndRespond(w, r, http.StatusInternalServerError, err)
 		}
 	case "PUT": // TODO
@@ -88,19 +91,19 @@ func (server *Server) statusHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var buf bytes.Buffer
-	if err := server.Cache.Load(&buf, defaultFormatterFunc); err != nil {
+	if err := server.Cache.Load(&buf, gamma.DefaultFormatterFunc); err != nil {
 		httpLogAndRespond(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	var results map[string]Result
-	if err := Decode(&buf, &results); err != nil {
+	var results map[string]gamma.Result
+	if err := json.NewDecoder(&buf).Decode(&results); err != nil {
 		httpLogAndRespond(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
 	status := strings.Split(r.URL.String(), "/")[2]
-	requestedResults := make(map[string]Result, 0)
+	requestedResults := make(map[string]gamma.Result, 0)
 	// NOTE: also implement for CLI
 	for id, result := range results {
 		if strconv.Itoa(result.Code) == status {
@@ -126,9 +129,9 @@ func httpLogAndRespond(w http.ResponseWriter, r *http.Request, code int, v inter
 		log.Printf("[http] %d %s %s", code, method, url)
 		w.WriteHeader(code)
 		if pretty := r.URL.Query().Get("pretty"); pretty == "" || pretty == "true" {
-			prettyJSONFormatterFunc(w, v)
+			gamma.PrettyJSONFormatterFunc(w, v)
 			return
 		}
-		jsonFormatterFunc(w, v)
+		gamma.JSONFormatterFunc(w, v)
 	}
 }
