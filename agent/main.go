@@ -13,8 +13,8 @@ import (
 var (
 	config  = "agent.json"
 	modules = struct {
-		Checks map[string]gamma.Check `json:"checks"`
-		Server *Server                `json:"server"`
+		Checks []gamma.Check `json:"checks"`
+		Server *Server       `json:"server"`
 	}{}
 )
 
@@ -32,14 +32,16 @@ func main() {
 		log.Fatalf("[error] [main] failed to decode agent modules: %v", err)
 	}
 
-	// run checks and and write results
-	cache, stdout := make(chan gamma.Result, len(modules.Checks)), make(chan gamma.Result, len(modules.Checks))
-	runChecks(cache, stdout)
-	writeResults(stdout)
+	agent := NewAgent(modules.Checks, make(chan gamma.Result, 0), gamma.NewShellExecuter(-1), modules.Server, make(chan error, 0))
 
-	// save results to server cache
-	modules.Server.Cache = NewCache()
-	cacheResults(modules.Server.Cache, cache)
+	// // run checks and and write results
+	// cache, stdout := make(chan gamma.Result, len(modules.Checks)), make(chan gamma.Result, len(modules.Checks))
+	// runChecks(cache, stdout)
+	// writeResults(stdout)
+
+	// // save results to server cache
+	// modules.Server.Cache = NewCache()
+	// cacheResults(modules.Server.Cache, cache)
 
 	// serve results over HTTP
 	addr := fmt.Sprintf("%s:%d", modules.Server.BindAddress, modules.Server.Port)

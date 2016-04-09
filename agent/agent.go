@@ -2,41 +2,55 @@ package main
 
 import (
 	"encoding/json"
-	"log"
+	"fmt"
 	"os"
 	"time"
 
 	"github.com/patrickrand/gamma"
 )
 
-func runChecks(cache, stdout chan gamma.Result) {
-	for id, check := range modules.Checks {
-		check.ID = id
-		modules.Checks[id] = check
-		go func(check gamma.Check) {
-			for range time.Tick(check.Interval * time.Second) {
-				result := check.Run(gamma.NewShellExecuter(-1))
-				cache <- result
-				stdout <- result
-			}
-		}(check)
+type Agent struct {
+	Checks         []gamma.Check     `json:"checks"`
+	Results        chan gamma.Result `json:"-"`
+	gamma.Executer `json:"executer"`
+	*Server        `json:"server"`
+	Errors         chan error `json:"-"`
+}
+
+// ToDo: make slice of "handler" channels
+
+func NewAgent(checks []gamma.Check, results chan gamma.Result, executer gamma.Executer, server *Server, errors chan error) *Agent {
+	return &Agent{
+		Checks:   checks,
+		Results:  results,
+		Executer: executer,
+		Server:   server,
+		Errors:   errors,
 	}
 }
 
-func writeResults(stdout chan gamma.Result) {
-	go func(stdout chan gamma.Result) {
-		for result := range stdout {
-			if err := json.NewEncoder(os.Stdout).Encode(result); err != nil {
-				log.Printf("[error] [main] failed to write result: %v", err)
-			}
-		}
-	}(stdout)
+func (agent *Agent) Run() {
+	agent.runChecks()
+	agent.handleResults()
 }
 
-func cacheResults(cache *Cache, results chan gamma.Result) {
-	go func(cache *Cache, results chan gamma.Result) {
-		for result := range results {
-			cache.Save(result)
+func (agent *Agent) runChecks() {
+	for _, check := range agent.Checks {
+		go func(agent *Agent, check gamma.Check) {
+			for range time.Tick(check.Interval * time.Second) {
+				agent.Results <- check.Run(agent)
+			}
+		}(agent, check)
+	}
+}
+
+func (agent *Agent) handleResults() {
+	go func(agent *Agent) {
+		for result := range agent.Results {
+			agent.Server.Cache.Save(result)
+			if err := json.NewEncoder(os.Stdout).Encode(result); err != nil {
+				agent.Errors <- fmt.Errorf("agent.handleResults failed to encode result: %v", err)
+			}
 		}
-	}(cache, results)
+	}(agent)
 }
